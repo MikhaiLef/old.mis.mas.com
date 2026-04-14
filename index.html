@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>MiS-MaS для HIASM</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #000000;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        body.light-theme {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .app {
+            width: 100%;
+            height: 100vh;
+            background: #000000;
+            display: block;
+            position: relative;
+        }
+
+        body.light-theme .app {
+            background: #ffffff;
+        }
+
+        /* Экран регистрации */
+        .register-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000000;
+            text-align: center;
+            z-index: 2000;
+            padding: 20px;
+            display: block;
+        }
+
+        body.light-theme .register-screen {
+            background: #ffffff;
+        }
+
+        .register-screen.hidden {
+            display: none;
+        }
+
+        .register-card {
+            background: #1c1c1e;
+            padding: 32px 24px;
+            width: 340px;
+            margin: 50px auto 0;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        body.light-theme .register-card {
+            background: #f2f2f7;
+            border: 1px solid #ccc;
+        }
+
+        .register-logo {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .register-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        body.light-theme .register-title {
+            color: #000000;
+        }
+
+        .register-subtitle {
+            font-size: 15px;
+            color: #8e8e93;
+            margin-bottom: 32px;
+        }
+
+        .register-input-wrapper {
+            background: #2c2c2e;
+            padding: 4px 16px;
+            margin-bottom: 24px;
+            text-align: left;
+            border: 1px solid #444;
+        }
+
+        body.light-theme .register-input-wrapper {
+            background: #ffffff;
+            border: 1px solid #e5e5ea;
+        }
+
+        .register-input-wrapper span {
+            color: #8e8e93;
+            font-size: 20px;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        .register-input {
+            background: transparent;
+            border: none;
+            padding: 16px 0;
+            color: white;
+            font-size: 16px;
+            width: 260px;
+            outline: none;
+        }
+
+        body.light-theme .register-input {
+            color: #000000;
+        }
+
+        .register-hint {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-bottom: 24px;
+        }
+
+        .register-btn {
+            background: #3390ec;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .register-btn:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        /* ----- ЭКРАН СПИСКА ЧАТОВ ----- */
+        .chats-screen {
+            width: 100%;
+            height: 100vh;
+            background: #000000;
+            display: block;
+            position: relative;
+        }
+
+        .chats-screen.hidden {
+            display: none;
+        }
+
+        .chats-header {
+            background: #000000;
+            padding: 12px 16px;
+            border-bottom: 1px solid #1c1c1e;
+            overflow: hidden;
+        }
+
+        .chats-header h1 {
+            font-size: 34px;
+            font-weight: bold;
+            color: #ffffff;
+            float: left;
+        }
+
+        .header-actions {
+            float: right;
+        }
+
+        .header-icon {
+            background: none;
+            border: none;
+            color: #3390ec;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .search-container {
+            padding: 8px 16px;
+            background: #000000;
+            clear: both;
+        }
+
+        .search-bar {
+            background: #1c1c1e;
+            padding: 8px 12px;
+            border: 1px solid #333;
+        }
+
+        .search-bar span {
+            color: #8e8e93;
+            font-size: 16px;
+            margin-right: 8px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 16px;
+            width: 80%;
+            outline: none;
+        }
+
+        body.light-theme .search-bar input {
+            color: #000000;
+        }
+
+        .chats-list {
+            height: calc(100vh - 180px);
+            overflow-y: auto;
+            background: #000000;
+        }
+
+        .chat-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #1c1c1e;
+            overflow: hidden;
+        }
+
+        .chat-avatar {
+            width: 54px;
+            height: 54px;
+            float: left;
+            text-align: center;
+            line-height: 54px;
+            font-size: 24px;
+            margin-right: 12px;
+            background: #3390ec;
+            color: white;
+        }
+
+        .avatar-main { background: #3390ec; }
+        .avatar-fav { background: #ff9f0a; }
+        .avatar-bot { background: #af52de; }
+        .avatar-private { background: #30b0c0; }
+
+        .chat-content {
+            margin-left: 66px;
+            padding: 8px 0;
+        }
+
+        .chat-header-row {
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .chat-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            float: left;
+            max-width: 70%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .verified-badge {
+            color: #3390ec;
+            font-size: 14px;
+        }
+
+        .chat-time {
+            font-size: 13px;
+            color: #8e8e93;
+            float: right;
+        }
+
+        .chat-message-row {
+            overflow: hidden;
+        }
+
+        .chat-last-message {
+            font-size: 14px;
+            color: #8e8e93;
+            float: left;
+            max-width: 70%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-badge {
+            background: #3390ec;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            padding: 0 6px;
+            float: right;
+        }
+
+        .bottom-tabs {
+            background: #000000;
+            border-top: 1px solid #1c1c1e;
+            padding: 8px 16px 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+        }
+
+        .bottom-tab {
+            background: none;
+            border: none;
+            color: #8e8e93;
+            font-size: 12px;
+            padding: 8px 0 6px;
+            text-align: center;
+            cursor: pointer;
+            float: left;
+            width: 50%;
+        }
+
+        .bottom-tab.active {
+            color: #3390ec;
+        }
+
+        .bottom-tab-icon {
+            font-size: 22px;
+            display: block;
+        }
+
+        /* ----- ЭКРАН ЧАТА ----- */
+        .chat-screen {
+            width: 100%;
+            height: 100vh;
+            background: #000000;
+            display: block;
+            position: relative;
+        }
+
+        .chat-screen.hidden {
+            display: none;
+        }
+
+        .chat-header {
+            background: #000000;
+            padding: 8px 16px;
+            border-bottom: 1px solid #1c1c1e;
+            overflow: hidden;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #3390ec;
+            font-size: 28px;
+            cursor: pointer;
+            float: left;
+            margin-right: 12px;
+        }
+
+        .chat-header-info {
+            float: left;
+            width: 70%;
+        }
+
+        .chat-header-avatar {
+            width: 36px;
+            height: 36px;
+            float: left;
+            text-align: center;
+            line-height: 36px;
+            font-size: 18px;
+            background: #3390ec;
+            color: white;
+            margin-right: 12px;
+        }
+
+        .chat-header-text {
+            margin-left: 48px;
+        }
+
+        .chat-header-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .chat-header-status {
+            font-size: 13px;
+            color: #8e8e93;
+        }
+
+        .header-menu {
+            background: none;
+            border: none;
+            color: #3390ec;
+            font-size: 22px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .messages-container {
+            height: calc(100vh - 150px);
+            overflow-y: auto;
+            padding: 12px 8px;
+            background: #000000;
+        }
+
+        .messages-list {
+            width: 100%;
+        }
+
+        .message-row {
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .message-row.own {
+            text-align: right;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            position: relative;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 15px;
+            display: inline-block;
+        }
+
+        .message-row.other .bubble {
+            background: #1c1c1e;
+            color: #ffffff;
+            float: left;
+        }
+
+        .message-row.own .bubble {
+            background: #3390ec;
+            color: white;
+            float: right;
+        }
+
+        .bubble-header {
+            margin-bottom: 4px;
+            font-size: 12px;
+            overflow: hidden;
+        }
+
+        .message-row.other .bubble-header .name {
+            color: #64d2ff;
+            font-weight: bold;
+            float: left;
+        }
+
+        .message-row.own .bubble-header .name {
+            color: #a8d4ff;
+            font-weight: bold;
+            float: left;
+        }
+
+        .time {
+            font-size: 11px;
+            opacity: 0.7;
+            float: right;
+            margin-left: 10px;
+        }
+
+        .text-content {
+            clear: both;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .message-image {
+            max-width: 100%;
+            max-height: 250px;
+            margin-top: 6px;
+            cursor: pointer;
+            display: block;
+        }
+
+        .image-caption {
+            margin-top: 4px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff5e5e;
+            font-size: 12px;
+            margin-top: 6px;
+            cursor: pointer;
+        }
+
+        .empty-chat {
+            text-align: center;
+            padding: 50px 20px;
+            color: #8e8e93;
+            font-size: 14px;
+        }
+
+        .input-panel {
+            background: #000000;
+            border-top: 1px solid #1c1c1e;
+            padding: 8px 12px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+        }
+
+        .attach-btn {
+            background: none;
+            border: none;
+            color: #8e8e93;
+            font-size: 24px;
+            cursor: pointer;
+            float: left;
+            margin-right: 8px;
+        }
+
+        .input-wrapper {
+            background: #1c1c1e;
+            padding: 6px 8px 6px 16px;
+            float: left;
+            width: calc(100% - 100px);
+            border: 1px solid #333;
+        }
+
+        .input-wrapper textarea {
+            background: transparent;
+            border: none;
+            padding: 6px 0;
+            color: #fff;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+            line-height: 1.4;
+            height: 24px;
+        }
+
+        body.light-theme .input-wrapper textarea {
+            color: #000000;
+        }
+
+        .send-btn {
+            background: #3390ec;
+            border: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+            float: right;
+        }
+
+        /* Превью изображения */
+        .image-preview-container {
+            padding: 8px 12px;
+            background: #000000;
+            border-top: 1px solid #1c1c1e;
+            position: relative;
+        }
+
+        .image-preview {
+            position: relative;
+            display: inline-block;
+            max-width: 150px;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            max-height: 100px;
+        }
+
+        .remove-preview-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff5e5e;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Просмотр изображения */
+        .image-viewer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000000;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .image-viewer-overlay img {
+            max-width: 95%;
+            max-height: 95%;
+            margin-top: 20px;
+        }
+
+        .close-viewer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* ----- ЭКРАН НАСТРОЕК ----- */
+        .settings-screen {
+            width: 100%;
+            height: 100vh;
+            background: #000000;
+            display: block;
+            position: relative;
+        }
+
+        .settings-screen.hidden {
+            display: none;
+        }
+
+        .settings-header {
+            background: #000000;
+            padding: 12px 16px;
+            border-bottom: 1px solid #1c1c1e;
+            overflow: hidden;
+        }
+
+        .settings-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffffff;
+            float: left;
+            margin-left: 20px;
+        }
+
+        .settings-content {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-section-title {
+            font-size: 13px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .setting-item {
+            background: #1c1c1e;
+            padding: 14px 16px;
+            margin-bottom: 1px;
+            cursor: pointer;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        body.light-theme .setting-item {
+            background: #f2f2f7;
+            border: 1px solid #ccc;
+        }
+
+        .setting-info {
+            float: left;
+            width: 80%;
+        }
+
+        .setting-label {
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .setting-description {
+            font-size: 13px;
+            color: #8e8e93;
+        }
+
+        .setting-value {
+            color: #8e8e93;
+            font-size: 14px;
+            float: right;
+        }
+
+        .toggle-switch {
+            width: 51px;
+            height: 31px;
+            background: #3a3a3c;
+            position: relative;
+            cursor: pointer;
+            float: right;
+        }
+
+        .toggle-switch.active {
+            background: #34c759;
+        }
+
+        .toggle-switch span {
+            position: absolute;
+            width: 27px;
+            height: 27px;
+            background: white;
+            top: 2px;
+            left: 2px;
+        }
+
+        .toggle-switch.active span {
+            left: 22px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 70px;
+            left: 16px;
+            right: 16px;
+            background: #1c1c1e;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            z-index: 100;
+            display: none;
+            border-left: 4px solid #3390ec;
+        }
+
+        .toast.error {
+            border-left-color: #ff5e5e;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .modal {
+            background: #1c1c1e;
+            width: 340px;
+            margin: 100px auto 0;
+            padding: 20px;
+            color: white;
+            border: 1px solid #444;
+        }
+
+        body.light-theme .modal {
+            background: #ffffff;
+            color: #000;
+            border: 1px solid #ccc;
+        }
+
+        .modal h3 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .modal input {
+            width: 90%;
+            padding: 12px 14px;
+            background: #2c2c2e;
+            border: 1px solid #555;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        body.light-theme .modal input {
+            background: #f2f2f7;
+            color: black;
+            border: 1px solid #ccc;
+        }
+
+        .modal-hint {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            text-align: right;
+        }
+
+        .modal-btn {
+            padding: 10px 18px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            background: #3390ec;
+            color: white;
+            margin-left: 8px;
+        }
+
+        .modal-btn.cancel {
+            background: transparent;
+            color: #8e8e93;
+        }
+
+        #imageInput {
+            display: none;
+        }
+        
+        .clearfix {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+<!-- ЭКРАН РЕГИСТРАЦИИ -->
+<div id="registerScreen" class="register-screen">
+    <div class="register-card">
+        <div class="register-logo">💬</div>
+        <h2 class="register-title">MiS-MaS</h2>
+        <p class="register-subtitle">Добро пожаловать в мессенджер</p>
+        <div class="register-input-wrapper">
+            <span>👤</span>
+            <input type="text" id="registerNameInput" class="register-input" placeholder="Введите ваше имя" maxlength="40" autocomplete="off">
+        </div>
+        <p class="register-hint">Имя будет отображаться в чатах</p>
+        <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
+    </div>
+</div>
+
+<div class="app">
+    <!-- ЭКРАН СПИСКА ЧАТОВ -->
+    <div id="chatsScreen" class="chats-screen">
+        <div class="chats-header">
+            <h1>Чаты</h1>
+            <div class="header-actions">
+                <button class="header-icon" id="addChatBtn" title="Новый чат">+</button>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="search-container">
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" placeholder="Поиск" id="searchInput">
+            </div>
+        </div>
+
+        <div class="chats-list" id="chatsList"></div>
+
+        <div class="bottom-tabs">
+            <button class="bottom-tab active" data-tab="chats">
+                <span class="bottom-tab-icon">💬</span>
+                <span>Чаты</span>
+            </button>
+            <button class="bottom-tab" data-tab="settings">
+                <span class="bottom-tab-icon">⚙️</span>
+                <span>Настройки</span>
+            </button>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН ЧАТА -->
+    <div id="chatScreen" class="chat-screen hidden">
+        <div class="chat-header">
+            <button class="back-button" id="backToChatsBtn">←</button>
+            <div class="chat-header-info">
+                <div class="chat-header-avatar" id="chatHeaderAvatar">💬</div>
+                <div class="chat-header-text">
+                    <div class="chat-header-name" id="chatHeaderName">MiS-MaS Chat</div>
+                    <div class="chat-header-status" id="chatHeaderStatus">онлайн</div>
+                </div>
+            </div>
+            <button class="header-menu" id="chatMenuBtn">⋯</button>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <div class="messages-list" id="messagesList">
+                <div class="empty-chat">Загрузка...</div>
+            </div>
+        </div>
+
+        <!-- Превью изображения -->
+        <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+            <div class="image-preview" id="imagePreview">
+                <img id="previewImg" src="" alt="Preview">
+                <button class="remove-preview-btn" id="removePreviewBtn">✕</button>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="input-panel">
+            <button class="attach-btn" id="attachBtn">📎</button>
+            <div class="input-wrapper">
+                <textarea id="messageField" placeholder="Сообщение" rows="1"></textarea>
+            </div>
+            <button class="send-btn" id="sendBtn">➤</button>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН НАСТРОЕК -->
+    <div id="settingsScreen" class="settings-screen hidden">
+        <div class="settings-header">
+            <button class="back-button" id="backFromSettingsBtn">←</button>
+            <h1>Настройки</h1>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="settings-content">
+            <div class="settings-section">
+                <div class="settings-section-title">Профиль</div>
+                <div class="setting-item" id="changeNameBtn">
+                    <div class="setting-info">
+                        <div class="setting-label">Имя пользователя</div>
+                        <div class="setting-description" id="currentNameDisplay">Не задано</div>
+                    </div>
+                    <span class="setting-value">✏️</span>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-section-title">Основные</div>
+                <div class="setting-item" id="showMyBinBtn">
+                    <div class="setting-info">
+                        <div class="setting-label">Мой BIN ID</div>
+                        <div class="setting-description" id="currentBinDisplay">Загрузка...</div>
+                    </div>
+                    <span class="setting-value">📋</span>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="setting-item" id="themeToggle">
+                    <div class="setting-info">
+                        <div class="setting-label">Тема</div>
+                        <div class="setting-description" id="themeDescription">Тёмная</div>
+                    </div>
+                    <span class="setting-value" id="themeIcon">🌙</span>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-section-title">Уведомления</div>
+                <div class="setting-item" id="notificationsToggle">
+                    <div class="setting-info">
+                        <div class="setting-label">Уведомления</div>
+                        <div class="setting-description" id="notificationsStatus">Включены</div>
+                    </div>
+                    <div class="toggle-switch active" id="notificationsSwitch"><span></span></div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="imageInput" accept="image/*">
+
+<div id="infoToast" class="toast">✅ Готово</div>
+<div id="errorToast" class="toast error">⚠️ Ошибка</div>
+
+<script type="text/javascript">
+// HIASM 4 совместимый JavaScript (IE7+)
+(function(){
+    // Замена const/let на var
+    var MAIN_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
+    var PRIVATE_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
+    
+    var currentChat = 'main';
+    var favoritesMessages = [];
+    var privateChats = [];
+    var notificationsEnabled = true;
+    var currentTheme = 'dark';
+    var myBinId = null;
+    
+    var cachedMainMessages = [];
+    var cachedPrivateMessages = {};
+    
+    var pendingImage = null;
+    
+    // Получение/создание user_id через cookie (IE7 совместимо)
+    function getCookie(name) {
+        var matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+    }
+    
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toGMTString();
+        }
+        document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+    }
+    
+    var currentUser = getCookie('mios_user_id');
+    if (!currentUser) {
+        currentUser = 'user_' + new Date().getTime() + '_' + Math.random().toString(36).substr(2, 8);
+        setCookie('mios_user_id', currentUser, 365);
+    }
+    
+    var savedUsername = getCookie('mios_username') || '';
+    var isRegistered = getCookie('mios_registered') === 'true';
+    
+    var BOT_NAME = 'MiS-MaS Bot';
+    
+    // DOM элементы
+    var registerScreen = document.getElementById('registerScreen');
+    var registerNameInput = document.getElementById('registerNameInput');
+    var registerBtn = document.getElementById('registerBtn');
+    var chatsScreen = document.getElementById('chatsScreen');
+    var chatScreen = document.getElementById('chatScreen');
+    var settingsScreen = document.getElementById('settingsScreen');
+    var chatsList = document.getElementById('chatsList');
+    var messagesListEl = document.getElementById('messagesList');
+    var messagesContainer = document.getElementById('messagesContainer');
+    var chatHeaderName = document.getElementById('chatHeaderName');
+    var chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
+    var chatHeaderStatus = document.getElementById('chatHeaderStatus');
+    var messageField = document.getElementById('messageField');
+    var sendBtn = document.getElementById('sendBtn');
+    var backToChatsBtn = document.getElementById('backToChatsBtn');
+    var infoToast = document.getElementById('infoToast');
+    var errorToast = document.getElementById('errorToast');
+    var searchInput = document.getElementById('searchInput');
+    var attachBtn = document.getElementById('attachBtn');
+    var imageInput = document.getElementById('imageInput');
+    var imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    var previewImg = document.getElementById('previewImg');
+    var removePreviewBtn = document.getElementById('removePreviewBtn');
+    
+    var notificationsSwitch = document.getElementById('notificationsSwitch');
+    var notificationsStatus = document.getElementById('notificationsStatus');
+    var themeDescription = document.getElementById('themeDescription');
+    var themeIcon = document.getElementById('themeIcon');
+    var currentBinDisplay = document.getElementById('currentBinDisplay');
+    var currentNameDisplay = document.getElementById('currentNameDisplay');
+    
+    // Вспомогательные функции
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    
+    function formatTime(dateStr) {
+        try {
+            var d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                var hours = d.getHours();
+                var minutes = d.getMinutes();
+                return (hours < 10 ? '0' : '') + hours + ':' + (minutes < 10 ? '0' : '') + minutes;
+            }
+        } catch(e) {}
+        return '';
+    }
+    
+    var toastTimeout;
+    function showInfo(text) {
+        infoToast.innerHTML = '✅ ' + text;
+        infoToast.className = 'toast show';
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function(){ infoToast.className = 'toast'; }, 2500);
+    }
+    
+    function showError(text) {
+        errorToast.innerHTML = '⚠️ ' + text;
+        errorToast.className = 'toast error show';
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function(){ errorToast.className = 'toast error'; }, 3000);
+    }
+    
+    // Замена fetch на XMLHttpRequest
+    function httpRequest(method, url, data, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 201) {
+                    callback(null, xhr.responseText);
+                } else {
+                    callback(new Error('HTTP ' + xhr.status), null);
+                }
+            }
+        };
+        xhr.send(data ? JSON.stringify(data) : null);
+    }
+    
+    // Promise-like обертка
+    function fetchJSON(method, url, data) {
+        return {
+            then: function(onSuccess, onError) {
+                httpRequest(method, url, data, function(err, response) {
+                    if (err) {
+                        if (onError) onError(err);
+                    } else {
+                        try {
+                            var json = JSON.parse(response);
+                            onSuccess({ ok: true, json: function() { return json; } });
+                        } catch(e) {
+                            if (onError) onError(e);
+                        }
+                    }
+                });
+            }
+        };
+    }
+    
+    function updateNameDisplay() {
+        if (currentNameDisplay) {
+            currentNameDisplay.innerHTML = savedUsername || 'Не задано';
+        }
+    }
+    updateNameDisplay();
+    
+    function checkRegistration() {
+        if (isRegistered && savedUsername) {
+            registerScreen.className = 'register-screen hidden';
+            return true;
+        }
+        registerScreen.className = 'register-screen';
+        return false;
+    }
+    
+    if (registerNameInput) {
+        registerNameInput.onkeyup = function() {
+            registerBtn.disabled = this.value.replace(/^\s+|\s+$/g, '').length === 0;
+        };
+        
+        registerNameInput.onkeydown = function(e) {
+            e = e || window.event;
+            if (e.keyCode === 13 && this.value.replace(/^\s+|\s+$/g, '')) {
+                completeRegistration();
+            }
+        };
+    }
+    
+    if (registerBtn) {
+        registerBtn.onclick = completeRegistration;
+    }
+    
+    function completeRegistration() {
+        var name = registerNameInput.value.replace(/^\s+|\s+$/g, '');
+        if (!name) return;
+        
+        savedUsername = name;
+        setCookie('mios_username', savedUsername, 365);
+        setCookie('mios_registered', 'true', 365);
+        isRegistered = true;
+        
+        updateNameDisplay();
+        registerScreen.className = 'register-screen hidden';
+        showInfo('Добро пожаловать, ' + savedUsername + '!');
+        
+        initApp();
+    }
+    
+    // Загрузка настроек из cookie
+    notificationsEnabled = getCookie('mios_notifications') !== 'false';
+    currentTheme = getCookie('mios_theme') || 'dark';
+    
+    if (currentTheme === 'light') {
+        document.body.className = 'light-theme';
+        if (themeDescription) themeDescription.innerHTML = 'Светлая';
+        if (themeIcon) themeIcon.innerHTML = '☀️';
+    }
+    
+    function getOrCreateBinId(callback) {
+        var binId = getCookie('mios_bin_id');
+        if (binId) {
+            myBinId = binId;
+            if (currentBinDisplay) currentBinDisplay.innerHTML = binId;
+            callback(binId);
+            return;
+        }
+        
+        var data = {
+            binId: 'bin_' + new Date().getTime() + '_' + Math.random().toString(36),
+            username: savedUsername || 'Пользователь',
+            createdAt: new Date().toISOString()
+        };
+        
+        fetchJSON('POST', PRIVATE_API_URL, data).then(
+            function(resp) {
+                var data = resp.json();
+                binId = data.id || data.binId;
+                setCookie('mios_bin_id', binId, 365);
+                myBinId = binId;
+                if (currentBinDisplay) currentBinDisplay.innerHTML = binId;
+                callback(binId);
+            },
+            function() {
+                binId = 'bin_' + new Date().getTime();
+                setCookie('mios_bin_id', binId, 365);
+                myBinId = binId;
+                if (currentBinDisplay) currentBinDisplay.innerHTML = binId;
+                callback(binId);
+            }
+        );
+    }
+    
+    function loadPrivateChats() {
+        try {
+            var stored = getCookie('mios_private_chats');
+            privateChats = stored ? JSON.parse(stored) : [];
+            for (var i = 0; i < privateChats.length; i++) {
+                if (!privateChats[i].messages) privateChats[i].messages = [];
+            }
+        } catch(e) { privateChats = []; }
+    }
+    
+    function savePrivateChats() {
+        setCookie('mios_private_chats', JSON.stringify(privateChats), 365);
+    }
+    loadPrivateChats();
+    
+    var hasSeenWelcome = getCookie('mios_welcome_bot');
+    if (!hasSeenWelcome) {
+        setCookie('mios_welcome_bot', 'true', 365);
+        var botChat = null;
+        for (var i = 0; i < privateChats.length; i++) {
+            if (privateChats[i].id === 'bot_chat') {
+                botChat = privateChats[i];
+                break;
+            }
+        }
+        if (!botChat) {
+            botChat = {
+                id: 'bot_chat',
+                name: BOT_NAME,
+                binId: 'bot.official',
+                messages: []
+            };
+            privateChats.push(botChat);
+        }
+        savePrivateChats();
+    }
+    
+    function loadFavorites() {
+        try {
+            var stored = getCookie('mios_fav');
+            favoritesMessages = stored ? JSON.parse(stored) : [];
+        } catch(e) { favoritesMessages = []; }
+    }
+    
+    function saveFavorites() {
+        setCookie('mios_fav', JSON.stringify(favoritesMessages), 365);
+    }
+    loadFavorites();
+    
+    function loadMainMessages(callback) {
+        fetchJSON('GET', MAIN_API_URL).then(
+            function(resp) {
+                var msgs = resp.json();
+                msgs.sort(function(a, b) {
+                    return new Date(a.date).getTime() - new Date(b.date).getTime();
+                });
+                cachedMainMessages = msgs;
+                
+                if (currentChat === 'main' && chatScreen.className.indexOf('hidden') === -1) {
+                    renderMainMessages();
+                }
+                if (callback) callback(msgs);
+            },
+            function() {
+                if (currentChat === 'main' && chatScreen.className.indexOf('hidden') === -1) {
+                    messagesListEl.innerHTML = '<div class="empty-chat">❌ Ошибка загрузки</div>';
+                }
+                if (callback) callback([]);
+            }
+        );
+    }
+    
+    function renderMainMessages() {
+        if (!cachedMainMessages.length) {
+            messagesListEl.innerHTML = '<div class="empty-chat">✨ Пока нет сообщений</div>';
+            return;
+        }
+        
+        var html = '';
+        for (var i = 0; i < cachedMainMessages.length; i++) {
+            var msg = cachedMainMessages[i];
+            var isOwn = msg.user_id === currentUser;
+            var name = escapeHtml(msg.username) || 'Аноним';
+            
+            if (msg.type === 'image' && msg.image) {
+                html += '<div class="message-row ' + (isOwn ? 'own' : 'other') + '">' +
+                    '<div class="bubble">' +
+                    '<div class="bubble-header">' +
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="time">' + formatTime(msg.date) + '</span>' +
+                    '<div class="clearfix"></div>' +
+                    '</div>' +
+                    '<img src="' + msg.image + '" class="message-image" onclick="window.openImageViewer(\'' + msg.image + '\')" alt="Изображение">' +
+                    (msg.message ? '<div class="image-caption">' + escapeHtml(msg.message) + '</div>' : '') +
+                    (isOwn ? '<button class="delete-btn" onclick="window.delMsg(\'' + msg.id + '\')">🗑️</button>' : '') +
+                    '</div><div class="clearfix"></div></div>';
+            } else {
+                html += '<div class="message-row ' + (isOwn ? 'own' : 'other') + '">' +
+                    '<div class="bubble">' +
+                    '<div class="bubble-header">' +
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="time">' + formatTime(msg.date) + '</span>' +
+                    '<div class="clearfix"></div>' +
+                    '</div>' +
+                    '<div class="text-content">' + escapeHtml(msg.message || '').replace(/\n/g, '<br>') + '</div>' +
+                    (isOwn ? '<button class="delete-btn" onclick="window.delMsg(\'' + msg.id + '\')">🗑️</button>' : '') +
+                    '</div><div class="clearfix"></div></div>';
+            }
+        }
+        
+        messagesListEl.innerHTML = html;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function loadPrivateMessages(chat, callback) {
+        fetchJSON('GET', PRIVATE_API_URL).then(
+            function(resp) {
+                var allData = resp.json();
+                var chatMessages = [];
+                
+                for (var i = 0; i < allData.length; i++) {
+                    var item = allData[i];
+                    if (item.chatId === chat.id || 
+                        (item.fromBin === chat.binId && item.toBin === myBinId) ||
+                        (item.toBin === chat.binId && item.fromBin === myBinId)) {
+                        chatMessages.push(item);
+                    }
+                }
+                
+                chatMessages.sort(function(a, b) {
+                    return new Date(a.date || a.createdAt).getTime() - new Date(b.date || b.createdAt).getTime();
+                });
+                
+                chat.messages = chatMessages;
+                cachedPrivateMessages[chat.id] = chatMessages.slice();
+                savePrivateChats();
+                
+                if (currentChat === chat.id && chatScreen.className.indexOf('hidden') === -1) {
+                    renderPrivateMessages(chat);
+                }
+                if (callback) callback(chatMessages);
+            },
+            function() {
+                if (callback) callback([]);
+            }
+        );
+    }
+    
+    function renderChatsList() {
+        var mainLastMsg = 'Нет сообщений', mainTime = '', mainUnread = 0;
+        
+        fetchJSON('GET', MAIN_API_URL).then(
+            function(resp) {
+                var msgs = resp.json();
+                if (msgs && msgs.length) {
+                    msgs.sort(function(a, b) {
+                        return new Date(b.date).getTime() - new Date(a.date).getTime();
+                    });
+                    var last = msgs[0];
+                    if (last.type === 'image') {
+                        mainLastMsg = (last.username || 'Аноним') + ': 📷 Фото';
+                    } else {
+                        mainLastMsg = (last.username || 'Аноним') + ': ' + (last.message || '').substring(0, 30);
+                    }
+                    mainTime = formatTime(last.date);
+                    mainUnread = msgs.length;
+                }
+                renderChatsListFinal(mainLastMsg, mainTime, mainUnread);
+            },
+            function() {
+                renderChatsListFinal(mainLastMsg, mainTime, mainUnread);
+            }
+        );
+    }
+    
+    function renderChatsListFinal(mainLastMsg, mainTime, mainUnread) {
+        var favLast = favoritesMessages.length ? 'Вы: ' + favoritesMessages[favoritesMessages.length-1].message.substring(0, 30) : 'Нет сообщений';
+        var favTime = favoritesMessages.length ? formatTime(favoritesMessages[favoritesMessages.length-1].date) : '';
+        
+        var chatsHtml = '';
+        chatsHtml += '<div class="chat-item" data-chat-id="main">' +
+            '<div class="chat-avatar avatar-main">💬</div>' +
+            '<div class="chat-content">' +
+            '<div class="chat-header-row">' +
+            '<span class="chat-name">MiS-MaS Chat</span>' +
+            (mainTime ? '<span class="chat-time">' + mainTime + '</span>' : '') +
+            '<div class="clearfix"></div>' +
+            '</div>' +
+            '<div class="chat-message-row">' +
+            '<span class="chat-last-message">' + mainLastMsg + '</span>' +
+            (mainUnread ? '<span class="chat-badge">' + mainUnread + '</span>' : '') +
+            '<div class="clearfix"></div>' +
+            '</div>' +
+            '</div><div class="clearfix"></div></div>';
+        
+        chatsHtml += '<div class="chat-item" data-chat-id="favorites">' +
+            '<div class="chat-avatar avatar-fav">⭐</div>' +
+            '<div class="chat-content">' +
+            '<div class="chat-header-row">' +
+            '<span class="chat-name">Избранное</span>' +
+            (favTime ? '<span class="chat-time">' + favTime + '</span>' : '') +
+            '<div class="clearfix"></div>' +
+            '</div>' +
+            '<div class="chat-message-row">' +
+            '<span class="chat-last-message">' + favLast + '</span>' +
+            '<div class="clearfix"></div>' +
+            '</div>' +
+            '</div><div class="clearfix"></div></div>';
+        
+        for (var i = 0; i < privateChats.length; i++) {
+            var chat = privateChats[i];
+            var lastMsg = chat.messages.length ? chat.messages[chat.messages.length-1] : null;
+            var lastText = 'Нет сообщений';
+            if (lastMsg) {
+                if (lastMsg.type === 'image') {
+                    lastText = (lastMsg.username || 'Собеседник') + ': 📷 Фото';
+                } else {
+                    lastText = (lastMsg.username || 'Собеседник') + ': ' + (lastMsg.message || lastMsg.text || '').substring(0, 25);
+                }
+            }
+            var time = lastMsg ? formatTime(lastMsg.date || lastMsg.createdAt) : '';
+            var isBot = chat.id === 'bot_chat';
+            var avatarIcon = isBot ? '🤖' : '👤';
+            var avatarClass = isBot ? 'avatar-bot' : 'avatar-private';
+            var nameDisplay = chat.name + (isBot ? ' <span class="verified-badge">✅</span>' : '');
+            
+            chatsHtml += '<div class="chat-item" data-chat-id="' + chat.id + '">' +
+                '<div class="chat-avatar ' + avatarClass + '">' + avatarIcon + '</div>' +
+                '<div class="chat-content">' +
+                '<div class="chat-header-row">' +
+                '<span class="chat-name">' + nameDisplay + '</span>' +
+                (time ? '<span class="chat-time">' + time + '</span>' : '') +
+                '<div class="clearfix"></div>' +
+                '</div>' +
+                '<div class="chat-message-row">' +
+                '<span class="chat-last-message">' + lastText + '</span>' +
+                '<div class="clearfix"></div>' +
+                '</div>' +
+                '</div><div class="clearfix"></div></div>';
+        }
+        
+        chatsList.innerHTML = chatsHtml;
+        
+        var items = chatsList.getElementsByTagName('div');
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].className.indexOf('chat-item') !== -1) {
+                items[i].onclick = function() {
+                    openChat(this.getAttribute('data-chat-id'));
+                };
+            }
+        }
+    }
+    
+    function openChat(chatId) {
+        currentChat = chatId;
+        chatsScreen.className = 'chats-screen hidden';
+        settingsScreen.className = 'settings-screen hidden';
+        chatScreen.className = 'chat-screen';
+        
+        pendingImage = null;
+        previewImg.src = '';
+        imagePreviewContainer.style.display = 'none';
+        
+        if (chatId === 'main') {
+            chatHeaderName.innerHTML = 'MiS-MaS Chat';
+            chatHeaderAvatar.innerHTML = '💬';
+            chatHeaderAvatar.className = 'chat-header-avatar avatar-main';
+            chatHeaderStatus.innerHTML = 'онлайн';
+            
+            messagesListEl.innerHTML = '<div class="empty-chat">Загрузка...</div>';
+            loadMainMessages();
+        } else if (chatId === 'favorites') {
+            chatHeaderName.innerHTML = 'Избранное';
+            chatHeaderAvatar.innerHTML = '⭐';
+            chatHeaderAvatar.className = 'chat-header-avatar avatar-fav';
+            chatHeaderStatus.innerHTML = 'личные заметки';
+            renderFavoritesMessages();
+        } else {
+            var priv = null;
+            for (var i = 0; i < privateChats.length; i++) {
+                if (privateChats[i].id === chatId) {
+                    priv = privateChats[i];
+                    break;
+                }
+            }
+            if (priv) {
+                var isBot = priv.id === 'bot_chat';
+                chatHeaderName.innerHTML = priv.name + (isBot ? ' <span class="verified-badge">✅</span>' : '');
+                chatHeaderAvatar.innerHTML = isBot ? '🤖' : '👤';
+                chatHeaderAvatar.className = 'chat-header-avatar ' + (isBot ? 'avatar-bot' : 'avatar-private');
+                chatHeaderStatus.innerHTML = isBot ? 'официальный бот' : 'BIN: ' + (priv.binId ? priv.binId.substring(0, 8) : 'неизвестно');
+                
+                messagesListEl.innerHTML = '<div class="empty-chat">Загрузка...</div>';
+                loadPrivateMessages(priv);
+            }
+        }
+    }
+    
+    function renderFavoritesMessages() {
+        if (!favoritesMessages.length) {
+            messagesListEl.innerHTML = '<div class="empty-chat">⭐ Здесь будут ваши заметки</div>';
+            return;
+        }
+        
+        var sorted = [];
+        for (var i = 0; i < favoritesMessages.length; i++) {
+            sorted.push(favoritesMessages[i]);
+        }
+        sorted.sort(function(a, b) {
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+        
+        var html = '';
+        for (var i = 0; i < sorted.length; i++) {
+            var msg = sorted[i];
+            html += '<div class="message-row own">' +
+                '<div class="bubble">' +
+                '<div class="bubble-header">' +
+                '<span class="name">Вы</span>' +
+                '<span class="time">' + formatTime(msg.date) + '</span>' +
+                '<div class="clearfix"></div>' +
+                '</div>' +
+                '<div class="text-content">' + escapeHtml(msg.message).replace(/\n/g, '<br>') + '</div>' +
+                '<button class="delete-btn" onclick="window.delFav(\'' + msg.id + '\')">🗑️</button>' +
+                '</div><div class="clearfix"></div></div>';
+        }
+        
+        messagesListEl.innerHTML = html;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function renderPrivateMessages(chat) {
+        if (!chat.messages.length) {
+            messagesListEl.innerHTML = '<div class="empty-chat">💬 Начните переписку</div>';
+            return;
+        }
+        
+        var html = '';
+        for (var i = 0; i < chat.messages.length; i++) {
+            var m = chat.messages[i];
+            var isOwn = m.fromBin === myBinId || m.user_id === currentUser;
+            var name = escapeHtml(m.username) || (isOwn ? 'Вы' : 'Собеседник');
+            var date = m.date || m.createdAt;
+            
+            if (m.type === 'image' && m.image) {
+                html += '<div class="message-row ' + (isOwn ? 'own' : 'other') + '">' +
+                    '<div class="bubble">' +
+                    '<div class="bubble-header">' +
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="time">' + formatTime(date) + '</span>' +
+                    '<div class="clearfix"></div>' +
+                    '</div>' +
+                    '<img src="' + m.image + '" class="message-image" onclick="window.openImageViewer(\'' + m.image + '\')" alt="Изображение">' +
+                    (m.message ? '<div class="image-caption">' + escapeHtml(m.message) + '</div>' : '') +
+                    '</div><div class="clearfix"></div></div>';
+            } else {
+                var text = m.message || m.text || '';
+                html += '<div class="message-row ' + (isOwn ? 'own' : 'other') + '">' +
+                    '<div class="bubble">' +
+                    '<div class="bubble-header">' +
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="time">' + formatTime(date) + '</span>' +
+                    '<div class="clearfix"></div>' +
+                    '</div>' +
+                    '<div class="text-content">' + escapeHtml(text).replace(/\n/g, '<br>') + '</div>' +
+                    '</div><div class="clearfix"></div></div>';
+            }
+        }
+        
+        messagesListEl.innerHTML = html;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function sendMessage() {
+        var msg = messageField.value.replace(/^\s+|\s+$/g, '');
+        var hasImage = !!pendingImage;
+        
+        if (!msg && !hasImage) {
+            showError('Введите сообщение или выберите изображение');
+            return;
+        }
+        sendBtn.disabled = true;
+        
+        var displayName = savedUsername || 'Аноним';
+        
+        if (currentChat === 'main') {
+            var messageData = {
+                username: displayName,
+                message: msg,
+                date: new Date().toLocaleString(),
+                user_id: currentUser
+            };
+            
+            if (hasImage) {
+                messageData.type = 'image';
+                messageData.image = pendingImage;
+            }
+            
+            fetchJSON('POST', MAIN_API_URL, messageData).then(
+                function() {
+                    messageField.value = '';
+                    pendingImage = null;
+                    previewImg.src = '';
+                    imagePreviewContainer.style.display = 'none';
+                    loadMainMessages();
+                    renderChatsList();
+                    showInfo('Отправлено');
+                    sendBtn.disabled = false;
+                },
+                function() {
+                    showError('Ошибка');
+                    sendBtn.disabled = false;
+                }
+            );
+        } else if (currentChat === 'favorites') {
+            favoritesMessages.push({
+                id: 'fav_' + new Date().getTime(),
+                message: msg,
+                date: new Date().toLocaleString()
+            });
+            saveFavorites();
+            messageField.value = '';
+            pendingImage = null;
+            previewImg.src = '';
+            imagePreviewContainer.style.display = 'none';
+            renderFavoritesMessages();
+            renderChatsList();
+            showInfo('Добавлено');
+            sendBtn.disabled = false;
+        } else {
+            var priv = null;
+            for (var i = 0; i < privateChats.length; i++) {
+                if (privateChats[i].id === currentChat) {
+                    priv = privateChats[i];
+                    break;
+                }
+            }
+            if (priv) {
+                var messageData = {
+                    chatId: priv.id,
+                    fromBin: myBinId,
+                    toBin: priv.binId,
+                    username: displayName,
+                    message: msg,
+                    date: new Date().toLocaleString(),
+                    user_id: currentUser
+                };
+                
+                if (hasImage) {
+                    messageData.type = 'image';
+                    messageData.image = pendingImage;
+                }
+                
+                fetchJSON('POST', PRIVATE_API_URL, messageData).then(
+                    function(resp) {
+                        var newMsg = resp.json();
+                        priv.messages.push(newMsg);
+                        cachedPrivateMessages[priv.id] = priv.messages.slice();
+                        savePrivateChats();
+                        
+                        if (priv.id === 'bot_chat') {
+                            setTimeout(function() {
+                                var botData = {
+                                    chatId: priv.id,
+                                    fromBin: 'bot.official',
+                                    toBin: myBinId,
+                                    username: BOT_NAME,
+                                    message: hasImage ? '📷 Отличное фото! Ваш BIN ID: ' + myBinId : '🤖 Ваш BIN ID: ' + myBinId + '. Поделитесь им с друзьями!',
+                                    date: new Date().toLocaleString()
+                                };
+                                
+                                fetchJSON('POST', PRIVATE_API_URL, botData).then(
+                                    function(botResp) {
+                                        var botMsg = botResp.json();
+                                        priv.messages.push(botMsg);
+                                        cachedPrivateMessages[priv.id] = priv.messages.slice();
+                                        savePrivateChats();
+                                        if (currentChat === priv.id) {
+                                            renderPrivateMessages(priv);
+                                        }
+                                        renderChatsList();
+                                    }
+                                );
+                            }, 500);
+                        }
+                        
+                        messageField.value = '';
+                        pendingImage = null;
+                        previewImg.src = '';
+                        imagePreviewContainer.style.display = 'none';
+                        renderPrivateMessages(priv);
+                        renderChatsList();
+                        showInfo('Отправлено');
+                        sendBtn.disabled = false;
+                    },
+                    function() {
+                        showError('Ошибка отправки');
+                        sendBtn.disabled = false;
+                    }
+                );
+            }
+        }
+    }
+    
+    // Глобальные функции
+    window.openImageViewer = function(imageSrc) {
+        var overlay = document.createElement('div');
+        overlay.className = 'image-viewer-overlay';
+        overlay.innerHTML = '<button class="close-viewer">✕</button><img src="' + imageSrc + '" alt="Просмотр">';
+        document.body.appendChild(overlay);
+        
+        overlay.onclick = function(e) {
+            e = e || window.event;
+            var target = e.target || e.srcElement;
+            if (target === overlay || target.className === 'close-viewer') {
+                document.body.removeChild(overlay);
+            }
+        };
+    };
+    
+    window.delMsg = function(id) {
+        if (!confirm('Удалить?')) return;
+        fetchJSON('DELETE', MAIN_API_URL + '/' + id).then(
+            function() {
+                loadMainMessages();
+                renderChatsList();
+                showInfo('Удалено');
+            }
+        );
+    };
+    
+    window.delFav = function(id) {
+        for (var i = 0; i < favoritesMessages.length; i++) {
+            if (favoritesMessages[i].id === id) {
+                favoritesMessages.splice(i, 1);
+                break;
+            }
+        }
+        saveFavorites();
+        renderFavoritesMessages();
+        renderChatsList();
+        showInfo('Удалено');
+    };
+    
+    // Обработчики событий
+    if (sendBtn) sendBtn.onclick = sendMessage;
+    
+    if (messageField) {
+        messageField.onkeydown = function(e) {
+            e = e || window.event;
+            if (e.keyCode === 13 && !e.shiftKey) {
+                e.returnValue = false;
+                if (e.preventDefault) e.preventDefault();
+                sendMessage();
+            }
+        };
+    }
+    
+    if (backToChatsBtn) {
+        backToChatsBtn.onclick = function() {
+            chatScreen.className = 'chat-screen hidden';
+            chatsScreen.className = 'chats-screen';
+            settingsScreen.className = 'settings-screen hidden';
+            pendingImage = null;
+            previewImg.src = '';
+            imagePreviewContainer.style.display = 'none';
+            renderChatsList();
+        };
+    }
+    
+    if (searchInput) {
+        searchInput.onkeyup = function() {
+            var q = this.value.toLowerCase();
+            var items = chatsList.getElementsByTagName('div');
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].className.indexOf('chat-item') !== -1) {
+                    var nameEl = items[i].getElementsByClassName('chat-name')[0];
+                    var name = nameEl ? (nameEl.innerText || nameEl.textContent).toLowerCase() : '';
+                    items[i].style.display = name.indexOf(q) !== -1 ? 'block' : 'none';
+                }
+            }
+        };
+    }
+    
+    var chatMenuBtn = document.getElementById('chatMenuBtn');
+    if (chatMenuBtn) {
+        chatMenuBtn.onclick = function() {
+            if (currentChat === 'main') {
+                if (confirm('Очистить общий чат?')) {
+                    fetchJSON('GET', MAIN_API_URL).then(function(resp) {
+                        var msgs = resp.json();
+                        function deleteNext(index) {
+                            if (index < msgs.length) {
+                                fetchJSON('DELETE', MAIN_API_URL + '/' + msgs[index].id).then(
+                                    function() { deleteNext(index + 1); },
+                                    function() { deleteNext(index + 1); }
+                                );
+                            } else {
+                                loadMainMessages();
+                                renderChatsList();
+                                showInfo('Очищено');
+                            }
+                        }
+                        deleteNext(0);
+                    });
+                }
+            } else if (currentChat === 'favorites') {
+                if (confirm('Очистить избранное?')) {
+                    favoritesMessages = [];
+                    saveFavorites();
+                    renderFavoritesMessages();
+                    renderChatsList();
+                    showInfo('Очищено');
+                }
+            } else {
+                var priv = null;
+                for (var i = 0; i < privateChats.length; i++) {
+                    if (privateChats[i].id === currentChat) {
+                        priv = privateChats[i];
+                        break;
+                    }
+                }
+                if (priv && confirm('Удалить чат?')) {
+                    var newPrivateChats = [];
+                    for (var i = 0; i < privateChats.length; i++) {
+                        if (privateChats[i].id !== currentChat) {
+                            newPrivateChats.push(privateChats[i]);
+                        }
+                    }
+                    privateChats = newPrivateChats;
+                    savePrivateChats();
+                    chatScreen.className = 'chat-screen hidden';
+                    chatsScreen.className = 'chats-screen';
+                    renderChatsList();
+                    showInfo('Чат удалён');
+                }
+            }
+        };
+    }
+    
+    var bottomTabs = document.getElementsByClassName('bottom-tab');
+    for (var i = 0; i < bottomTabs.length; i++) {
+        bottomTabs[i].onclick = function() {
+            for (var j = 0; j < bottomTabs.length; j++) {
+                bottomTabs[j].className = bottomTabs[j].className.replace(' active', '');
+            }
+            this.className += ' active';
+            var tabName = this.getAttribute('data-tab');
+            if (tabName === 'chats') {
+                chatsScreen.className = 'chats-screen';
+                settingsScreen.className = 'settings-screen hidden';
+                chatScreen.className = 'chat-screen hidden';
+                renderChatsList();
+            } else {
+                chatsScreen.className = 'chats-screen hidden';
+                settingsScreen.className = 'settings-screen';
+                chatScreen.className = 'chat-screen hidden';
+                updateNameDisplay();
+            }
+        };
+    }
+    
+    var backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
+    if (backFromSettingsBtn) {
+        backFromSettingsBtn.onclick = function() {
+            settingsScreen.className = 'settings-screen hidden';
+            chatsScreen.className = 'chats-screen';
+            renderChatsList();
+        };
+    }
+    
+    var changeNameBtn = document.getElementById('changeNameBtn');
+    if (changeNameBtn) {
+        changeNameBtn.onclick = function() {
+            var overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = '<div class="modal">' +
+                '<h3>✏️ Изменить имя</h3>' +
+                '<input type="text" id="newNameInput" value="' + escapeHtml(savedUsername) + '" maxlength="40">' +
+                '<div class="modal-hint">Имя будет отображаться во всех чатах</div>' +
+                '<div class="modal-actions">' +
+                '<button class="modal-btn cancel">Отмена</button>' +
+                '<button class="modal-btn" id="confirmChangeName">Сохранить</button>' +
+                '</div></div>';
+            document.body.appendChild(overlay);
+            
+            var input = document.getElementById('newNameInput');
+            input.focus();
+            input.select();
+            
+            var cancelBtn = overlay.getElementsByClassName('cancel')[0];
+            cancelBtn.onclick = function() {
+                document.body.removeChild(overlay);
+            };
+            
+            var saveName = function() {
+                var newName = input.value.replace(/^\s+|\s+$/g, '');
+                if (newName) {
+                    savedUsername = newName;
+                    setCookie('mios_username', savedUsername, 365);
+                    updateNameDisplay();
+                    showInfo('Имя изменено на: ' + savedUsername);
+                }
+                document.body.removeChild(overlay);
+            };
+            
+            document.getElementById('confirmChangeName').onclick = saveName;
+            
+            input.onkeydown = function(e) {
+                e = e || window.event;
+                if (e.keyCode === 13) saveName();
+            };
+        };
+    }
+    
+    if (notificationsSwitch) {
+        notificationsSwitch.onclick = function() {
+            notificationsEnabled = !notificationsEnabled;
+            if (notificationsEnabled) {
+                this.className = 'toggle-switch active';
+                notificationsStatus.innerHTML = 'Включены';
+                setCookie('mios_notifications', 'true', 365);
+                showInfo('Уведомления включены');
+            } else {
+                this.className = 'toggle-switch';
+                notificationsStatus.innerHTML = 'Отключены';
+                setCookie('mios_notifications', 'false', 365);
+                showInfo('Отключены');
+            }
+        };
+    }
+    
+    var themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.onclick = function() {
+            if (currentTheme === 'dark') {
+                currentTheme = 'light';
+                document.body.className = 'light-theme';
+                themeDescription.innerHTML = 'Светлая';
+                themeIcon.innerHTML = '☀️';
+                setCookie('mios_theme', 'light', 365);
+            } else {
+                currentTheme = 'dark';
+                document.body.className = '';
+                themeDescription.innerHTML = 'Тёмная';
+                themeIcon.innerHTML = '🌙';
+                setCookie('mios_theme', 'dark', 365);
+            }
+            showInfo('Тема изменена');
+        };
+    }
+    
+    var showMyBinBtn = document.getElementById('showMyBinBtn');
+    if (showMyBinBtn) {
+        showMyBinBtn.onclick = function() {
+            if (window.clipboardData) {
+                window.clipboardData.setData('Text', myBinId);
+            }
+            showInfo('BIN ID скопирован: ' + myBinId);
+        };
+    }
+    
+    var addChatBtn = document.getElementById('addChatBtn');
+    if (addChatBtn) {
+        addChatBtn.onclick = function() {
+            var overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = '<div class="modal">' +
+                '<h3>➕ Новый чат по BIN ID</h3>' +
+                '<input type="text" id="binInput" placeholder="BIN ID собеседника">' +
+                '<div class="modal-hint">Ваш BIN ID: ' + myBinId + '<br>Посмотреть можно в Настройках</div>' +
+                '<div class="modal-actions">' +
+                '<button class="modal-btn cancel">Отмена</button>' +
+                '<button class="modal-btn" id="confirmAddChat">Создать чат</button>' +
+                '</div></div>';
+            document.body.appendChild(overlay);
+            
+            var input = document.getElementById('binInput');
+            input.focus();
+            
+            overlay.getElementsByClassName('cancel')[0].onclick = function() {
+                document.body.removeChild(overlay);
+            };
+            
+            var createChat = function() {
+                var targetBin = input.value.replace(/^\s+|\s+$/g, '');
+                if (!targetBin) {
+                    showError('Введите BIN ID');
+                    document.body.removeChild(overlay);
+                    return;
+                }
+                
+                if (targetBin === myBinId) {
+                    showError('Нельзя создать чат с самим собой');
+                    document.body.removeChild(overlay);
+                    return;
+                }
+                
+                var exists = false;
+                for (var i = 0; i < privateChats.length; i++) {
+                    if (privateChats[i].binId === targetBin) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (exists) {
+                    showError('Чат с этим BIN ID уже существует');
+                    document.body.removeChild(overlay);
+                    return;
+                }
+                
+                var chatId = 'priv_' + new Date().getTime();
+                var newChat = {
+                    id: chatId,
+                    binId: targetBin,
+                    name: 'Чат с ' + targetBin.substring(0, 8),
+                    messages: []
+                };
+                privateChats.push(newChat);
+                savePrivateChats();
+                
+                renderChatsList();
+                document.body.removeChild(overlay);
+                showInfo('✅ Чат создан!');
+                openChat(chatId);
+            };
+            
+            document.getElementById('confirmAddChat').onclick = createChat;
+            
+            input.onkeydown = function(e) {
+                e = e || window.event;
+                if (e.keyCode === 13) createChat();
+            };
+        };
+    }
+    
+    if (attachBtn) {
+        attachBtn.onclick = function() {
+            imageInput.click();
+        };
+    }
+    
+    if (imageInput) {
+        imageInput.onchange = function(e) {
+            // В IE7 нет File API, поэтому изображения не поддерживаются
+            showError('Отправка изображений не поддерживается в этой версии');
+            imageInput.value = '';
+        };
+    }
+    
+    if (removePreviewBtn) {
+        removePreviewBtn.onclick = function() {
+            pendingImage = null;
+            previewImg.src = '';
+            imagePreviewContainer.style.display = 'none';
+        };
+    }
+    
+    function backgroundUpdate() {
+        if (chatsScreen.className.indexOf('hidden') === -1) {
+            renderChatsList();
+        }
+        
+        if (currentChat === 'main' && chatScreen.className.indexOf('hidden') === -1) {
+            loadMainMessages();
+        } else if (currentChat && currentChat !== 'main' && currentChat !== 'favorites' && chatScreen.className.indexOf('hidden') === -1) {
+            var priv = null;
+            for (var i = 0; i < privateChats.length; i++) {
+                if (privateChats[i].id === currentChat) {
+                    priv = privateChats[i];
+                    break;
+                }
+            }
+            if (priv) {
+                loadPrivateMessages(priv);
+            }
+        }
+    }
+    
+    function initApp() {
+        getOrCreateBinId(function() {
+            var botChat = null;
+            for (var i = 0; i < privateChats.length; i++) {
+                if (privateChats[i].id === 'bot_chat') {
+                    botChat = privateChats[i];
+                    break;
+                }
+            }
+            if (botChat && botChat.messages.length === 0) {
+                botChat.messages.push({
+                    id: 'bot_welcome_' + new Date().getTime(),
+                    message: '👋 Добро пожаловать в MiS-MaS, ' + savedUsername + '!\n\n📱 Ваш BIN ID: ' + myBinId + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите BIN ID друга.',
+                    date: new Date().toLocaleString(),
+                    username: BOT_NAME,
+                    fromBin: 'bot.official'
+                });
+                cachedPrivateMessages['bot_chat'] = botChat.messages.slice();
+                savePrivateChats();
+            }
+            
+            renderChatsList();
+            loadMainMessages();
+        });
+    }
+    
+    if (checkRegistration()) {
+        initApp();
+    }
+    
+    setInterval(backgroundUpdate, 5000);
+    
+})();
+</script>
+</body>
+</html>
