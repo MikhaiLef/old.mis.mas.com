@@ -221,6 +221,7 @@
 
         .chats-list {
             height: calc(100vh - 180px);
+            height: expression(100vh - 180px);
             overflow-y: auto;
             background: #000000;
         }
@@ -413,6 +414,7 @@
 
         .messages-container {
             height: calc(100vh - 150px);
+            height: expression(100vh - 150px);
             overflow-y: auto;
             padding: 12px 8px;
             background: #000000;
@@ -540,6 +542,7 @@
             padding: 6px 8px 6px 16px;
             float: left;
             width: calc(100% - 100px);
+            width: expression(100% - 100px);
             border: 1px solid #333;
         }
 
@@ -666,6 +669,7 @@
 
         .settings-content {
             height: calc(100vh - 60px);
+            height: expression(100vh - 60px);
             overflow-y: auto;
             padding: 16px;
         }
@@ -846,6 +850,65 @@
             clear: both;
         }
     </style>
+    <!-- JSON полифилл для IE7 -->
+    <script type="text/javascript">
+        // JSON polyfill for IE7
+        if (!window.JSON) {
+            window.JSON = {
+                parse: function(sJSON) {
+                    return eval('(' + sJSON + ')');
+                },
+                stringify: (function() {
+                    var toString = Object.prototype.toString;
+                    var isArray = Array.isArray || function(a) {
+                        return toString.call(a) === '[object Array]';
+                    };
+                    var escMap = {'"': '\\"', '\\': '\\\\', '\b': '\\b', '\f': '\\f', '\n': '\\n', '\r': '\\r', '\t': '\\t'};
+                    var escFunc = function(m) {
+                        return escMap[m] || '\\u' + (m.charCodeAt(0) + 0x10000).toString(16).substr(1);
+                    };
+                    var escRE = /[\\"\u0000-\u001F\u2028\u2029]/g;
+                    return function stringify(value) {
+                        if (value == null) {
+                            return 'null';
+                        } else if (typeof value === 'number') {
+                            return isFinite(value) ? value.toString() : 'null';
+                        } else if (typeof value === 'boolean') {
+                            return value.toString();
+                        } else if (typeof value === 'object') {
+                            if (typeof value.toJSON === 'function') {
+                                return stringify(value.toJSON());
+                            } else if (isArray(value)) {
+                                var res = '[';
+                                for (var i = 0; i < value.length; i++) {
+                                    if (i > 0) res += ', ';
+                                    var val = value[i];
+                                    if (typeof val === 'undefined' || typeof val === 'function') {
+                                        res += 'null';
+                                    } else {
+                                        res += stringify(val);
+                                    }
+                                }
+                                return res + ']';
+                            } else if (toString.call(value) === '[object Object]') {
+                                var tmp = [];
+                                for (var k in value) {
+                                    if (value.hasOwnProperty(k)) {
+                                        var v = value[k];
+                                        if (typeof v !== 'undefined' && typeof v !== 'function') {
+                                            tmp.push(stringify(k) + ': ' + stringify(v));
+                                        }
+                                    }
+                                }
+                                return '{' + tmp.join(', ') + '}';
+                            }
+                        }
+                        return '"' + value.toString().replace(escRE, escFunc) + '"';
+                    };
+                })()
+            };
+        }
+    </script>
 </head>
 <body>
 <!-- ЭКРАН РЕГИСТРАЦИИ -->
@@ -1078,7 +1141,8 @@
     // Вспомогательные функции
     function escapeHtml(text) {
         if (!text) return '';
-        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        text = String(text);
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
     
     function formatTime(dateStr) {
@@ -1204,6 +1268,11 @@
         if (themeIcon) themeIcon.innerHTML = '☀️';
     }
     
+    if (!notificationsEnabled && notificationsSwitch) {
+        notificationsSwitch.className = 'toggle-switch';
+        if (notificationsStatus) notificationsStatus.innerHTML = 'Отключены';
+    }
+    
     function getOrCreateBinId(callback) {
         var binId = getCookie('mios_bin_id');
         if (binId) {
@@ -1216,13 +1285,13 @@
         var data = {
             binId: 'bin_' + new Date().getTime() + '_' + Math.random().toString(36),
             username: savedUsername || 'Пользователь',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString ? new Date().toISOString() : new Date().toString()
         };
         
         fetchJSON('POST', PRIVATE_API_URL, data).then(
             function(resp) {
-                var data = resp.json();
-                binId = data.id || data.binId;
+                var respData = resp.json();
+                binId = respData.id || respData.binId;
                 setCookie('mios_bin_id', binId, 365);
                 myBinId = binId;
                 if (currentBinDisplay) currentBinDisplay.innerHTML = binId;
@@ -1372,7 +1441,10 @@
                 });
                 
                 chat.messages = chatMessages;
-                cachedPrivateMessages[chat.id] = chatMessages.slice();
+                cachedPrivateMessages[chat.id] = [];
+                for (var j = 0; j < chatMessages.length; j++) {
+                    cachedPrivateMessages[chat.id].push(chatMessages[j]);
+                }
                 savePrivateChats();
                 
                 if (currentChat === chat.id && chatScreen.className.indexOf('hidden') === -1) {
@@ -1622,12 +1694,13 @@
         sendBtn.disabled = true;
         
         var displayName = savedUsername || 'Аноним';
+        var dateStr = new Date().toString();
         
         if (currentChat === 'main') {
             var messageData = {
                 username: displayName,
                 message: msg,
-                date: new Date().toLocaleString(),
+                date: dateStr,
                 user_id: currentUser
             };
             
@@ -1656,7 +1729,7 @@
             favoritesMessages.push({
                 id: 'fav_' + new Date().getTime(),
                 message: msg,
-                date: new Date().toLocaleString()
+                date: dateStr
             });
             saveFavorites();
             messageField.value = '';
@@ -1682,7 +1755,7 @@
                     toBin: priv.binId,
                     username: displayName,
                     message: msg,
-                    date: new Date().toLocaleString(),
+                    date: dateStr,
                     user_id: currentUser
                 };
                 
@@ -1695,7 +1768,10 @@
                     function(resp) {
                         var newMsg = resp.json();
                         priv.messages.push(newMsg);
-                        cachedPrivateMessages[priv.id] = priv.messages.slice();
+                        cachedPrivateMessages[priv.id] = [];
+                        for (var j = 0; j < priv.messages.length; j++) {
+                            cachedPrivateMessages[priv.id].push(priv.messages[j]);
+                        }
                         savePrivateChats();
                         
                         if (priv.id === 'bot_chat') {
@@ -1706,14 +1782,17 @@
                                     toBin: myBinId,
                                     username: BOT_NAME,
                                     message: hasImage ? '📷 Отличное фото! Ваш BIN ID: ' + myBinId : '🤖 Ваш BIN ID: ' + myBinId + '. Поделитесь им с друзьями!',
-                                    date: new Date().toLocaleString()
+                                    date: new Date().toString()
                                 };
                                 
                                 fetchJSON('POST', PRIVATE_API_URL, botData).then(
                                     function(botResp) {
                                         var botMsg = botResp.json();
                                         priv.messages.push(botMsg);
-                                        cachedPrivateMessages[priv.id] = priv.messages.slice();
+                                        cachedPrivateMessages[priv.id] = [];
+                                        for (var k = 0; k < priv.messages.length; k++) {
+                                            cachedPrivateMessages[priv.id].push(priv.messages[k]);
+                                        }
                                         savePrivateChats();
                                         if (currentChat === priv.id) {
                                             renderPrivateMessages(priv);
@@ -1814,8 +1893,14 @@
             var items = chatsList.getElementsByTagName('div');
             for (var i = 0; i < items.length; i++) {
                 if (items[i].className.indexOf('chat-item') !== -1) {
-                    var nameEl = items[i].getElementsByClassName('chat-name')[0];
-                    var name = nameEl ? (nameEl.innerText || nameEl.textContent).toLowerCase() : '';
+                    var nameElements = items[i].getElementsByTagName('span');
+                    var name = '';
+                    for (var j = 0; j < nameElements.length; j++) {
+                        if (nameElements[j].className === 'chat-name') {
+                            name = (nameElements[j].innerText || nameElements[j].textContent).toLowerCase();
+                            break;
+                        }
+                    }
                     items[i].style.display = name.indexOf(q) !== -1 ? 'block' : 'none';
                 }
             }
@@ -2082,7 +2167,7 @@
     
     if (imageInput) {
         imageInput.onchange = function(e) {
-            // В IE7 нет File API, поэтому изображения не поддерживаются
+            // В IE7 нет File API
             showError('Отправка изображений не поддерживается в этой версии');
             imageInput.value = '';
         };
@@ -2130,11 +2215,14 @@
                 botChat.messages.push({
                     id: 'bot_welcome_' + new Date().getTime(),
                     message: '👋 Добро пожаловать в MiS-MaS, ' + savedUsername + '!\n\n📱 Ваш BIN ID: ' + myBinId + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите BIN ID друга.',
-                    date: new Date().toLocaleString(),
+                    date: new Date().toString(),
                     username: BOT_NAME,
                     fromBin: 'bot.official'
                 });
-                cachedPrivateMessages['bot_chat'] = botChat.messages.slice();
+                cachedPrivateMessages['bot_chat'] = [];
+                for (var j = 0; j < botChat.messages.length; j++) {
+                    cachedPrivateMessages['bot_chat'].push(botChat.messages[j]);
+                }
                 savePrivateChats();
             }
             
