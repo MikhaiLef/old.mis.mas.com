@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>MiS-MaS для HIASM</title>
+    <title>MiS-MaS web</title>
     <style type="text/css">
         * {
             margin: 0;
@@ -575,7 +575,7 @@
             float: right;
         }
 
-        /* Превью изображения */
+        
         .image-preview-container {
             padding: 8px 12px;
             background: #000000;
@@ -608,7 +608,7 @@
             cursor: pointer;
         }
 
-        /* Просмотр изображения */
+        
         .image-viewer-overlay {
             position: fixed;
             top: 0;
@@ -639,7 +639,7 @@
             border: none;
         }
 
-        /* ----- ЭКРАН НАСТРОЕК ----- */
+        
         .settings-screen {
             width: 100%;
             height: 100vh;
@@ -850,9 +850,9 @@
             clear: both;
         }
     </style>
-    <!-- JSON полифилл для IE7 -->
+    
     <script type="text/javascript">
-        // JSON polyfill for IE7
+        
         if (!window.JSON) {
             window.JSON = {
                 parse: function(sJSON) {
@@ -911,12 +911,12 @@
     </script>
 </head>
 <body>
-<!-- ЭКРАН РЕГИСТРАЦИИ -->
+
 <div id="registerScreen" class="register-screen">
     <div class="register-card">
         <div class="register-logo">💬</div>
-        <h2 class="register-title">MiS-MaS</h2>
-        <p class="register-subtitle">Добро пожаловать в мессенджер</p>
+        <h2 class="register-title">MiS-MaS web</h2>
+        <p class="register-subtitle">Добро пожаловать в MiS-MaS web</p>
         <div class="register-input-wrapper">
             <span>👤</span>
             <input type="text" id="registerNameInput" class="register-input" placeholder="Введите ваше имя" maxlength="40" autocomplete="off">
@@ -927,7 +927,6 @@
 </div>
 
 <div class="app">
-    <!-- ЭКРАН СПИСКА ЧАТОВ -->
     <div id="chatsScreen" class="chats-screen">
         <div class="chats-header">
             <h1>Чаты</h1>
@@ -959,7 +958,8 @@
         </div>
     </div>
 
-    <!-- ЭКРАН ЧАТА -->
+
+    
     <div id="chatScreen" class="chat-screen hidden">
         <div class="chat-header">
             <button class="back-button" id="backToChatsBtn">←</button>
@@ -980,7 +980,7 @@
             </div>
         </div>
 
-        <!-- Превью изображения -->
+        
         <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
             <div class="image-preview" id="imagePreview">
                 <img id="previewImg" src="" alt="Preview">
@@ -999,7 +999,7 @@
         </div>
     </div>
 
-    <!-- ЭКРАН НАСТРОЕК -->
+    
     <div id="settingsScreen" class="settings-screen hidden">
         <div class="settings-header">
             <button class="back-button" id="backFromSettingsBtn">←</button>
@@ -1061,9 +1061,9 @@
 <div id="errorToast" class="toast error">⚠️ Ошибка</div>
 
 <script type="text/javascript">
-// HIASM 4 совместимый JavaScript (IE7+)
+
 (function(){
-    // Замена const/let на var
+    
     var MAIN_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
     var PRIVATE_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
     
@@ -1079,7 +1079,7 @@
     
     var pendingImage = null;
     
-    // Получение/создание user_id через cookie (IE7 совместимо)
+    
     function getCookie(name) {
         var matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
         return matches ? decodeURIComponent(matches[1]) : undefined;
@@ -1106,7 +1106,7 @@
     
     var BOT_NAME = 'MiS-MaS Bot';
     
-    // DOM элементы
+    
     var registerScreen = document.getElementById('registerScreen');
     var registerNameInput = document.getElementById('registerNameInput');
     var registerBtn = document.getElementById('registerBtn');
@@ -1138,7 +1138,7 @@
     var currentBinDisplay = document.getElementById('currentBinDisplay');
     var currentNameDisplay = document.getElementById('currentNameDisplay');
     
-    // Вспомогательные функции
+    
     function escapeHtml(text) {
         if (!text) return '';
         text = String(text);
@@ -1172,7 +1172,7 @@
         toastTimeout = setTimeout(function(){ errorToast.className = 'toast error'; }, 3000);
     }
     
-    // Замена fetch на XMLHttpRequest
+    
     function httpRequest(method, url, data, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open(method, url, true);
@@ -1189,7 +1189,7 @@
         xhr.send(data ? JSON.stringify(data) : null);
     }
     
-    // Promise-like обертка
+    
     function fetchJSON(method, url, data) {
         return {
             then: function(onSuccess, onError) {
@@ -1258,7 +1258,7 @@
         initApp();
     }
     
-    // Загрузка настроек из cookie
+    
     notificationsEnabled = getCookie('mios_notifications') !== 'false';
     currentTheme = getCookie('mios_theme') || 'dark';
     
@@ -1821,7 +1821,7 @@
         }
     }
     
-    // Глобальные функции
+    
     window.openImageViewer = function(imageSrc) {
         var overlay = document.createElement('div');
         overlay.className = 'image-viewer-overlay';
@@ -1861,7 +1861,7 @@
         showInfo('Удалено');
     };
     
-    // Обработчики событий
+    
     if (sendBtn) sendBtn.onclick = sendMessage;
     
     if (messageField) {
@@ -2167,7 +2167,7 @@
     
     if (imageInput) {
         imageInput.onchange = function(e) {
-            // В IE7 нет File API
+            
             showError('Отправка изображений не поддерживается в этой версии');
             imageInput.value = '';
         };
