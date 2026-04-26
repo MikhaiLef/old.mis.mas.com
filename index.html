@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MiS-MaS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #edeef0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #2a2a2a;
+      -webkit-tap-highlight-color: transparent;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .app { max-width: 1000px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; }
+
+    .register-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: #4a6d8c; display: flex; align-items: center; justify-content: center; z-index: 2000;
+    }
+    .register-card {
+      background: #ffffff; border-radius: 4px; padding: 32px 28px;
+      max-width: 420px; width: 90%; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+    .register-logo { font-size: 32px; font-weight: 700; color: #4a6d8c; margin-bottom: 8px; text-align: center; letter-spacing: 1px; }
+    .register-subtitle { font-size: 14px; color: #656565; margin-bottom: 24px; text-align: center; border-bottom: 1px solid #e7e8ec; padding-bottom: 16px; }
+    .register-input-wrapper { margin-bottom: 20px; }
+    .register-input-wrapper label { display: block; font-size: 13px; color: #656565; margin-bottom: 6px; font-weight: 500; }
+    .register-input {
+      width: 100%; padding: 12px; border: 1px solid #d3d9de; border-radius: 4px;
+      font-size: 14px; outline: none; background: #fafbfc; color: #000; box-sizing: border-box;
+    }
+    .register-input:focus { border-color: #4a6d8c; background: #fff; }
+    .register-hint { font-size: 12px; color: #888; margin-bottom: 24px; margin-top: -12px; }
+    .register-btn {
+      background: #5b7ea0; border: none; border-radius: 4px; padding: 12px;
+      width: 100%; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .register-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #8faec9; }
+    .register-btn:not(:disabled):hover { background: #4a6d8c; }
+
+    .license-screen, .reject-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;
+    }
+    .license-card, .reject-card {
+      background: white; border-radius: 4px; padding: 24px;
+      max-width: 500px; width: 90%; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .license-text-container {
+      background: #fafbfc; border: 1px solid #e7e8ec; border-radius: 4px;
+      padding: 16px; margin-bottom: 20px; max-height: 350px; overflow-y: auto; font-size: 13px; line-height: 1.5;
+    }
+    .license-accept-btn {
+      background: #5b7ea0; border: none; border-radius: 4px; padding: 12px;
+      width: 100%; color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px;
+    }
+    .license-reject-btn {
+      background: #d9534f; border: none; border-radius: 4px; padding: 12px;
+      width: 100%; color: white; font-weight: 600; cursor: pointer;
+    }
+    .hidden { display: none !important; }
+
+    .page-header {
+      background: #4a6d8c; padding: 8px 16px; display: flex;
+      align-items: center; justify-content: space-between; color: white; position: sticky; top: 0; z-index: 20;
+    }
+    .header-logo { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; }
+    .header-nav { display: flex; gap: 16px; font-size: 13px; }
+    .header-nav span { cursor: pointer; opacity: 0.9; padding: 4px 0; }
+    .header-nav span.active { opacity: 1; font-weight: 600; border-bottom: 2px solid white; padding-bottom: 2px; }
+
+    .main-layout { display: flex; flex: 1; background: #edeef0; }
+    .left-menu {
+      width: 200px; background: #ffffff; padding: 12px 0;
+      border-right: 1px solid #e7e8ec; font-size: 13px;
+    }
+    .left-menu-item { padding: 8px 20px; cursor: pointer; color: #4a6d8c; font-weight: 500; border-left: 3px solid transparent; }
+    .left-menu-item:hover { background: #e9edf1; }
+    .left-menu-item.active { background: #e9edf1; border-left-color: #4a6d8c; font-weight: 600; }
+    .content-area { flex: 1; padding: 16px; overflow-y: auto; max-height: calc(100vh - 42px); }
+
+    .profile-header {
+      background: white; border-radius: 4px; padding: 20px;
+      margin-bottom: 16px; border: 1px solid #e7e8ec;
+    }
+    .profile-info { display: flex; gap: 20px; align-items: center; }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%; background: #d3d9de;
+      display: flex; align-items: center; justify-content: center; font-size: 32px; color: #4a6d8c; flex-shrink: 0;
+    }
+    .profile-details h2 { font-size: 20px; margin-bottom: 4px; }
+    .profile-details .status { color: #656565; font-size: 13px; }
+    .post-creator {
+      background: white; border-radius: 4px; padding: 16px;
+      margin-bottom: 16px; border: 1px solid #e7e8ec;
+    }
+    .post-creator textarea {
+      width: 100%; border: 1px solid #d3d9de; border-radius: 4px; padding: 10px;
+      resize: vertical; min-height: 60px; font-family: inherit; font-size: 13px;
+      margin-bottom: 8px; box-sizing: border-box;
+    }
+    .post-feed { display: flex; flex-direction: column; gap: 12px; }
+    .post-item {
+      background: white; border-radius: 4px; padding: 16px; border: 1px solid #e7e8ec;
+    }
+    .post-author { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .post-author-avatar {
+      width: 40px; height: 40px; border-radius: 50%; background: #d3d9de;
+      display: flex; align-items: center; justify-content: center; font-weight: bold; color: #4a6d8c;
+    }
+    .post-author-name { font-weight: 600; color: #4a6d8c; }
+    .post-date { color: #888; font-size: 12px; }
+    .post-text { margin-bottom: 8px; line-height: 1.4; }
+
+    .chat-layout {
+      display: flex; flex: 1; background: white; border-radius: 4px;
+      border: 1px solid #e7e8ec; min-height: 500px;
+    }
+    .chat-list-panel { width: 280px; border-right: 1px solid #e7e8ec; display: flex; flex-direction: column; }
+    .chat-search { padding: 10px; border-bottom: 1px solid #e7e8ec; }
+    .chat-search input {
+      width: 100%; padding: 8px; border: 1px solid #d3d9de;
+      border-radius: 4px; font-size: 13px; box-sizing: border-box;
+    }
+    .chat-contacts { flex: 1; overflow-y: auto; }
+    .chat-contact {
+      padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+      cursor: pointer; border-bottom: 1px solid #f0f2f5;
+    }
+    .chat-contact:hover { background: #f0f2f5; }
+    .chat-contact.active { background: #e9edf1; }
+    .chat-contact-avatar {
+      width: 42px; height: 42px; border-radius: 50%; background: #e0e4e8;
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .chat-window { flex: 1; display: flex; flex-direction: column; }
+    .messages-container { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 6px; background: #e9edf1; align-self: flex-start; word-wrap: break-word; }
+    .message-bubble.own { background: #cce4ff; align-self: flex-end; }
+    .message-sender { font-weight: 600; color: #4a6d8c; font-size: 12px; margin-bottom: 4px; }
+    .message-time { font-size: 10px; color: #888; margin-top: 4px; }
+    .chat-input-area { border-top: 1px solid #e7e8ec; padding: 10px; display: flex; gap: 8px; }
+    .chat-input-area input {
+      flex: 1; padding: 10px; border: 1px solid #d3d9de;
+      border-radius: 4px; font-size: 13px; box-sizing: border-box;
+    }
+    .btn { padding: 8px 18px; border-radius: 4px; border: none; cursor: pointer; font-weight: 500; font-size: 13px; }
+    .btn-primary { background: #5b7ea0; color: white; }
+    .btn-primary:hover { background: #4a6d8c; }
+    .send-btn {
+      background: #5b7ea0; border: none; color: white; padding: 10px 18px;
+      border-radius: 4px; cursor: pointer; font-weight: 600;
+    }
+    .send-btn:hover { background: #4a6d8c; }
+    .send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .toast {
+      position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
+      background: #333; color: white; padding: 10px 20px;
+      border-radius: 4px; font-size: 13px; z-index: 3000; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #d9534f; }
+
+    @media (max-width: 700px) {
+      .left-menu { display: none; }
+      .chat-list-panel { width: 100%; }
+      .chat-layout { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div id="appRoot" class="app">
+  <div id="registerScreen" class="register-screen">
+    <div class="register-card">
+      <div class="register-logo">MiS-MaS</div>
+      <div class="register-subtitle">Добро пожаловать</div>
+      <div class="register-input-wrapper">
+        <label>Ваше имя</label>
+        <input type="text" id="registerNameInput" class="register-input" placeholder="Введите имя">
+      </div>
+      <p class="register-hint">Имя будет отображаться в профиле и чатах</p>
+      <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
+    </div>
+  </div>
+
+  <div id="licenseScreen" class="license-screen hidden">
+    <div class="license-card">
+      <h3 style="margin-bottom:16px;">Лицензионное соглашение</h3>
+      <div class="license-text-container" id="licenseTextContainer"></div>
+      <button class="license-accept-btn" id="licenseAcceptBtn">Принимаю</button>
+      <button class="license-reject-btn" id="licenseRejectBtn">Отказываюсь</button>
+    </div>
+  </div>
+
+  <div id="rejectScreen" class="reject-screen hidden">
+    <div class="reject-card">
+      <h3>Доступ запрещён</h3>
+      <p style="margin:16px 0;">Вы отказались от соглашения.</p>
+      <button class="btn btn-primary" id="rejectBackBtn">Вернуться</button>
+    </div>
+  </div>
+
+  <div id="mainInterface" class="hidden" style="display:flex;flex-direction:column;flex:1;">
+    <header class="page-header">
+      <div class="header-logo" id="logoBtn">MiS-MaS</div>
+      <div class="header-nav">
+        <span data-page="profile" class="active">Моя страница</span>
+        <span data-page="feed">Новости</span>
+        <span data-page="messages">Сообщения</span>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <div class="left-menu">
+        <div class="left-menu-item active" data-page="profile">Моя страница</div>
+        <div class="left-menu-item" data-page="feed">Новости</div>
+        <div class="left-menu-item" data-page="messages">Сообщения</div>
+        <div class="left-menu-item" id="settingsMenuBtn">Настройки</div>
+      </div>
+      <div class="content-area" id="contentArea"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function() {
+  const API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
+  const CHANNEL_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
+  
+  document.getElementById('licenseTextContainer').innerHTML = `
+    <p><strong>Лицензионное соглашение MiS-MaS</strong></p>
+    <p>1. Сервис предоставляется "как есть".</p>
+    <p>2. Запрещено нарушать законодательство.</p>
+    <p>3. Администрация не несет ответственности за контент пользователей.</p>
+    <p>4. Используя сервис, вы соглашаетесь с правилами.</p>
+  `;
+
+  let currentUser = {
+    id: localStorage.getItem('mismos_user_id') || ('user_' + Date.now() + '_' + Math.random().toString(36).substr(2,8)),
+    name: localStorage.getItem('mismos_username') || '',
+    binId: null
+  };
+  localStorage.setItem('mismos_user_id', currentUser.id);
+
+  let isRegistered = localStorage.getItem('mismos_registered') === 'true';
+  let licenseAccepted = localStorage.getItem('mismos_license') === 'true';
+  let currentPage = 'profile';
+  let privateChats = [];
+  let currentChatId = null;
+  let messageRefreshTimer = null;
+
+  function showToast(msg, isError) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast';
+    if (isError) toast.className += ' error';
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 3000);
+  }
+
+  function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ============== API ФУНКЦИИ ==============
+
+  // Проверка доступности API
+  async function checkAPIAvailable() {
+    try {
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
+      var resp = await fetch(API_URL, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      return resp.ok;
+    } catch(e) {
+      console.log('API недоступен:', e.message);
+      return false;
+    }
+  }
+
+  // Тестовый запрос к API
+  async function testAPI() {
+    try {
+      var resp = await fetch(API_URL + '?limit=1');
+      if (resp.ok) {
+        console.log('API работает');
+        return true;
+      }
+      console.log('API ответил с ошибкой:', resp.status);
+      return false;
+    } catch(e) {
+      console.log('API недоступен:', e.message);
+      return false;
+    }
+  }
+
+  async function getOrCreateBinId() {
+    var bid = localStorage.getItem('mismos_bin_id');
+    if (bid) {
+      currentUser.binId = bid;
+      return bid;
+    }
+    
+    bid = 'bin_' + Date.now();
+    localStorage.setItem('mismos_bin_id', bid);
+    currentUser.binId = bid;
+    return bid;
+  }
+
+  // Отправка сообщения через API с повторными попытками
+  async function sendMessageViaAPI(chat, text) {
+    var messageData = {
+      fromBin: currentUser.binId,
+      toBin: chat.binId,
+      username: currentUser.name,
+      message: text,
+      text: text,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    console.log('Попытка отправки сообщения:', messageData);
+    
+    // Пробуем отправить 3 раза
+    for (var attempt = 1; attempt <= 3; attempt++) {
+      try {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 10000);
+        
+        var resp = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(messageData),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (resp.ok) {
+          var savedMsg = await resp.json();
+          console.log('Сообщение сохранено в API (попытка ' + attempt + '):', savedMsg);
+          chat.messages.push(savedMsg);
+          return true;
+        } else {
+          console.log('API вернул ошибку (попытка ' + attempt + '):', resp.status);
+        }
+      } catch(e) {
+        console.log('Ошибка отправки (попытка ' + attempt + '):', e.message);
+      }
+      
+      if (attempt < 3) {
+        console.log('Ожидание перед повторной попыткой...');
+        await new Promise(function(resolve) { setTimeout(resolve, 1000); });
+      }
+    }
+    
+    // Если API недоступен, сохраняем локально
+    console.log('Все попытки отправки через API не удались. Сохраняем локально.');
+    var localMsg = {
+      id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      fromBin: currentUser.binId,
+      toBin: chat.binId,
+      username: currentUser.name,
+      message: text,
+      text: text,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      _local: true
+    };
+    chat.messages.push(localMsg);
+    saveLocalMessage(chat.id, localMsg);
+    return true; // Возвращаем true т.к. сообщение сохранено локально
+  }
+
+  // Сохранение сообщения локально
+  function saveLocalMessage(chatId, msg) {
+    try {
+      var allLocal = JSON.parse(localStorage.getItem('mismos_local_messages') || '{}');
+      if (!allLocal[chatId]) {
+        allLocal[chatId] = [];
+      }
+      allLocal[chatId].push(msg);
+      localStorage.setItem('mismos_local_messages', JSON.stringify(allLocal));
+    } catch(e) {
+      console.error('Ошибка сохранения локального сообщения:', e);
+    }
+  }
+
+  // Загрузка локальных сообщений для чата
+  function loadLocalMessages(chatId) {
+    try {
+      var allLocal = JSON.parse(localStorage.getItem('mismos_local_messages') || '{}');
+      return allLocal[chatId] || [];
+    } catch(e) {
+      return [];
+    }
+  }
+
+  // Загрузка сообщений из API
+  async function loadAllMessagesFromAPI() {
+    try {
+      var resp = await fetch(API_URL);
+      if (!resp.ok) {
+        console.log('API ответил с ошибкой при загрузке:', resp.status);
+        return [];
+      }
+      var all = await resp.json();
+      console.log('Загружено из API:', all.length, 'сообщений');
+      return all;
+    } catch(e) {
+      console.log('Ошибка загрузки из API:', e.message);
+      return [];
+    }
+  }
+
+  async function buildChatsFromAPI() {
+    if (!currentUser.binId) return;
+    
+    var allMessages = await loadAllMessagesFromAPI();
+    var chatsMap = {};
+    
+    // Обрабатываем сообщения из API
+    allMessages.forEach(function(msg) {
+      var partnerBin;
+      if (msg.fromBin === currentUser.binId) {
+        partnerBin = msg.toBin;
+      } else if (msg.toBin === currentUser.binId) {
+        partnerBin = msg.fromBin;
+      } else {
+        return; // Сообщение не относится к нашему пользователю
+      }
+      
+      if (!partnerBin || partnerBin === currentUser.binId) return;
+      
+      if (!chatsMap[partnerBin]) {
+        chatsMap[partnerBin] = {
+          id: 'chat_' + partnerBin,
+          binId: partnerBin,
+          name: 'Пользователь ' + partnerBin.substring(0, 8),
+          messages: []
+        };
+      }
+      
+      var exists = chatsMap[partnerBin].messages.find(function(m) { return m.id === msg.id; });
+      if (!exists) {
+        chatsMap[partnerBin].messages.push(msg);
+      }
+    });
+    
+    // Восстанавливаем сохраненные чаты
+    var savedChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
+    savedChats.forEach(function(sc) {
+      if (!chatsMap[sc.binId]) {
+        chatsMap[sc.binId] = {
+          id: sc.id || 'chat_' + sc.binId,
+          binId: sc.binId,
+          name: sc.name || 'Пользователь ' + sc.binId.substring(0, 8),
+          messages: []
+        };
+      } else {
+        chatsMap[sc.binId].id = sc.id || chatsMap[sc.binId].id;
+        chatsMap[sc.binId].name = sc.name || chatsMap[sc.binId].name;
+      }
+    });
+    
+    privateChats = Object.values(chatsMap);
+    
+    // Добавляем локальные сообщения и сортируем
+    privateChats.forEach(function(chat) {
+      var localMsgs = loadLocalMessages(chat.id);
+      localMsgs.forEach(function(lm) {
+        var exists = chat.messages.find(function(m) { return m.id === lm.id; });
+        if (!exists) {
+          chat.messages.push(lm);
+        }
+      });
+      
+      chat.messages.sort(function(a, b) {
+        return new Date(a.date || a.createdAt || 0) - new Date(b.date || b.createdAt || 0);
+      });
+    });
+    
+    // Добавляем бота
+    if (!privateChats.find(function(c) { return c.binId === 'bot.official'; })) {
+      privateChats.unshift({
+        id: 'chat_bot',
+        binId: 'bot.official',
+        name: 'MiS-MaS Bot',
+        messages: [{
+          id: 'bot_welcome',
+          fromBin: 'bot.official',
+          toBin: currentUser.binId,
+          username: 'MiS-MaS Bot',
+          message: 'Привет! Твой BIN ID: ' + currentUser.binId + '. Отправь мне любое сообщение!',
+          text: 'Привет! Твой BIN ID: ' + currentUser.binId + '. Отправь мне любое сообщение!',
+          date: new Date().toISOString(),
+          createdAt: new Date().toISOString()
+        }]
+      });
+    }
+    
+    saveChatsList();
+  }
+
+  function saveChatsList() {
+    var chatsMeta = privateChats.map(function(c) {
+      return { id: c.id, binId: c.binId, name: c.name };
+    });
+    localStorage.setItem('mismos_chats_list', JSON.stringify(chatsMeta));
+  }
+
+  async function loadPosts() {
+    try {
+      var resp = await fetch(CHANNEL_API_URL);
+      if (!resp.ok) {
+        console.log('API постов ответил с ошибкой:', resp.status);
+        return JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
+      }
+      var all = await resp.json();
+      var posts = all.filter(function(m) {
+        return m.type === 'post' && m.text;
+      }).sort(function(a, b) {
+        return new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0);
+      });
+      return posts;
+    } catch(e) {
+      console.log('Ошибка загрузки постов:', e.message);
+      return JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
+    }
+  }
+
+  async function createPost(text) {
+    var postData = {
+      type: 'post',
+      authorBinId: currentUser.binId,
+      authorName: currentUser.name,
+      text: text,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    try {
+      var resp = await fetch(CHANNEL_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postData)
+      });
+      if (resp.ok) return true;
+    } catch(e) {
+      console.log('Ошибка создания поста через API:', e.message);
+    }
+    
+    // Сохраняем локально
+    var localPosts = JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
+    postData.id = 'local_post_' + Date.now();
+    localPosts.push(postData);
+    localStorage.setItem('mismos_posts_local', JSON.stringify(localPosts));
+    return true;
+  }
+
+  // ============== UI ФУНКЦИИ ==============
+
+  function refreshCurrentChat() {
+    if (!currentChatId) return;
+    var chat = privateChats.find(function(c) { return c.id === currentChatId; });
+    if (!chat) return;
+    renderChatMessages(chat);
+    var searchInput = document.getElementById('chatSearchInput');
+    renderChatList(searchInput ? searchInput.value : '');
+  }
+
+  async function refreshMessages() {
+    await buildChatsFromAPI();
+    refreshCurrentChat();
+    var searchInput = document.getElementById('chatSearchInput');
+    renderChatList(searchInput ? searchInput.value : '');
+  }
+
+  async function renderPage(page) {
+    currentPage = page;
+    switch(page) {
+      case 'profile': await renderProfile(); break;
+      case 'feed': await renderFeed(); break;
+      case 'messages': await renderMessages(); break;
+      default: await renderProfile();
+    }
+  }
+
+  async function renderProfile() {
+    var posts = await loadPosts();
+    var myPosts = posts.filter(function(p) {
+      return p.authorBinId === currentUser.binId;
+    });
+
+    contentArea.innerHTML = `
+      <div class="profile-header">
+        <div class="profile-info">
+          <div class="profile-avatar">${escapeHtml(currentUser.name.charAt(0).toUpperCase())}</div>
+          <div class="profile-details">
+            <h2>${escapeHtml(currentUser.name)}</h2>
+            <div class="status">BIN ID: ${currentUser.binId || 'Загрузка...'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="post-creator">
+        <textarea id="newPostText" placeholder="Что у вас нового?"></textarea>
+        <button class="btn btn-primary" id="publishPostBtn">Опубликовать</button>
+      </div>
+      <div class="post-feed" id="profilePosts"></div>
+    `;
+
+    document.getElementById('publishPostBtn').addEventListener('click', async function() {
+      var text = document.getElementById('newPostText').value.trim();
+      if (!text) return;
+      var ok = await createPost(text);
+      showToast(ok ? 'Пост опубликован' : 'Ошибка');
+      if (ok) await renderProfile();
+    });
+
+    var container = document.getElementById('profilePosts');
+    if (myPosts.length === 0) {
+      container.innerHTML = '<p style="color:#656565; padding:20px; text-align:center;">У вас пока нет постов.</p>';
+    } else {
+      container.innerHTML = myPosts.map(function(p) { return buildPostHTML(p); }).join('');
+    }
+  }
+
+  async function renderFeed() {
+    var posts = await loadPosts();
+    contentArea.innerHTML = '<div class="post-feed" id="feedPosts"></div>';
+    var container = document.getElementById('feedPosts');
+    if (posts.length === 0) {
+      container.innerHTML = '<p style="color:#656565; padding:20px; text-align:center;">Лента пуста.</p>';
+    } else {
+      container.innerHTML = posts.map(function(p) { return buildPostHTML(p); }).join('');
+    }
+  }
+
+  function buildPostHTML(p) {
+    var name = p.authorName || 'Пользователь';
+    var dateStr = '';
+    try {
+      var d = new Date(p.date || p.createdAt);
+      if (!isNaN(d.getTime())) dateStr = d.toLocaleString('ru-RU');
+    } catch(e) {}
+    return `
+      <div class="post-item">
+        <div class="post-author">
+          <div class="post-author-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
+          <div>
+            <div class="post-author-name">${escapeHtml(name)}</div>
+            <div class="post-date">${dateStr}</div>
+          </div>
+        </div>
+        <div class="post-text">${escapeHtml(p.text || '')}</div>
+      </div>
+    `;
+  }
+
+  async function renderMessages() {
+    // Проверяем доступность API
+    var apiAvailable = await testAPI();
+    console.log('API доступен:', apiAvailable);
+    
+    if (!apiAvailable) {
+      showToast('API временно недоступен. Используется локальное хранилище.', true);
+    }
+    
+    await buildChatsFromAPI();
+    
+    contentArea.innerHTML = `
+      <div class="chat-layout">
+        <div class="chat-list-panel">
+          <div class="chat-search">
+            <input type="text" placeholder="Поиск чатов" id="chatSearchInput">
+          </div>
+          <div class="chat-contacts" id="chatContactsList"></div>
+          <button class="btn btn-primary" style="margin:10px;" id="newChatBtn">Новый чат</button>
+          <button class="btn btn-secondary" style="margin:0 10px 10px 10px;" id="refreshChatsBtn">Обновить чаты</button>
+          <div style="padding:10px;font-size:11px;color:#888;text-align:center;" id="apiStatus">
+            ${apiAvailable ? 'API подключен' : 'API недоступен. Сообщения сохраняются локально.'}
+          </div>
+        </div>
+        <div class="chat-window" id="chatWindow">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#888;">Выберите чат</div>
+        </div>
+      </div>
+    `;
+    
+    renderChatList();
+
+    document.getElementById('newChatBtn').addEventListener('click', function() {
+      var binId = prompt('Введите BIN ID собеседника:');
+      if (!binId || !binId.trim()) return;
+      binId = binId.trim();
+      
+      if (binId === currentUser.binId) {
+        showToast('Нельзя создать чат с самим собой', true);
+        return;
+      }
+      
+      var existing = privateChats.find(function(c) { return c.binId === binId; });
+      if (existing) {
+        openChat(existing.id);
+        showToast('Чат уже существует');
+      } else {
+        var newChat = {
+          id: 'chat_' + binId,
+          binId: binId,
+          name: 'Пользователь ' + binId.substring(0, 8),
+          messages: []
+        };
+        privateChats.push(newChat);
+        saveChatsList();
+        renderChatList();
+        openChat(newChat.id);
+        showToast('Чат создан! Отправьте сообщение.');
+      }
+    });
+
+    document.getElementById('refreshChatsBtn').addEventListener('click', async function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Обновление...';
+      await refreshMessages();
+      var apiAvailable = await testAPI();
+      var statusEl = document.getElementById('apiStatus');
+      if (statusEl) {
+        statusEl.textContent = apiAvailable ? 'API подключен' : 'API недоступен. Сообщения сохраняются локально.';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Обновить чаты';
+      showToast('Чаты обновлены');
+    });
+
+    var searchInput = document.getElementById('chatSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        renderChatList(this.value);
+      });
+    }
+
+    if (currentChatId) {
+      var chat = privateChats.find(function(c) { return c.id === currentChatId; });
+      if (chat) openChat(chat.id);
+    }
+
+    startMessageAutoRefresh();
+  }
+
+  function startMessageAutoRefresh() {
+    if (messageRefreshTimer) clearInterval(messageRefreshTimer);
+    messageRefreshTimer = setInterval(async function() {
+      if (currentPage === 'messages') {
+        await buildChatsFromAPI();
+        if (currentChatId) {
+          var chat = privateChats.find(function(c) { return c.id === currentChatId; });
+          if (chat && document.getElementById('chatMessages')) {
+            renderChatMessages(chat);
+          }
+        }
+        var searchInput = document.getElementById('chatSearchInput');
+        renderChatList(searchInput ? searchInput.value : '');
+      }
+    }, 5000); // Проверка каждые 5 секунд
+  }
+
+  function renderChatList(filter) {
+    filter = filter || '';
+    var list = document.getElementById('chatContactsList');
+    if (!list) return;
+    
+    var filtered = privateChats.filter(function(c) {
+      return c.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+    });
+    
+    if (filtered.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Нет чатов</div>';
+      return;
+    }
+    
+    list.innerHTML = filtered.map(function(c) {
+      var lastMsg = 'Нет сообщений';
+      if (c.messages.length > 0) {
+        var last = c.messages[c.messages.length - 1];
+        lastMsg = (last.message || last.text || '').substring(0, 30);
+      }
+      return `
+        <div class="chat-contact ${c.id === currentChatId ? 'active' : ''}" data-chat-id="${c.id}">
+          <div class="chat-contact-avatar">${escapeHtml(c.name.charAt(0).toUpperCase())}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;">${escapeHtml(c.name)}</div>
+            <div style="font-size:12px;color:#888;">${escapeHtml(lastMsg)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('.chat-contact').forEach(function(el) {
+      el.addEventListener('click', function() {
+        openChat(this.getAttribute('data-chat-id'));
+      });
+    });
+  }
+
+  function openChat(chatId) {
+    currentChatId = chatId;
+    var chat = privateChats.find(function(c) { return c.id === chatId; });
+    if (!chat) return;
+
+    var windowDiv = document.getElementById('chatWindow');
+    if (!windowDiv) return;
+    
+    windowDiv.innerHTML = `
+      <div class="messages-container" id="chatMessages"></div>
+      <div class="chat-input-area">
+        <input type="text" id="chatMessageInput" placeholder="Напишите сообщение...">
+        <button class="send-btn" id="sendChatMsgBtn">Отправить</button>
+      </div>
+    `;
+
+    renderChatMessages(chat);
+    var searchInput = document.getElementById('chatSearchInput');
+    renderChatList(searchInput ? searchInput.value : '');
+
+    var sendBtn = document.getElementById('sendChatMsgBtn');
+    var msgInput = document.getElementById('chatMessageInput');
+
+    async function handleSend() {
+      if (!msgInput) return;
+      var text = msgInput.value.trim();
+      if (!text) return;
+      
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Отправка...';
+      }
+      
+      // Отправляем сообщение
+      await sendMessageViaAPI(chat, text);
+      
+      // Очищаем поле
+      msgInput.value = '';
+      
+      // Обновляем отображение
+      renderChatMessages(chat);
+      renderChatList(document.getElementById('chatSearchInput')?.value || '');
+      
+      // Ответ бота
+      if (chat.binId === 'bot.official') {
+        setTimeout(async function() {
+          var botMsg = {
+            id: 'bot_' + Date.now(),
+            fromBin: 'bot.official',
+            toBin: currentUser.binId,
+            username: 'MiS-MaS Bot',
+            message: 'Сообщение получено! Твой BIN ID: ' + currentUser.binId + '. Я работаю локально.',
+            text: 'Сообщение получено! Твой BIN ID: ' + currentUser.binId + '. Я работаю локально.',
+            date: new Date().toISOString(),
+            createdAt: new Date().toISOString()
+          };
+          chat.messages.push(botMsg);
+          saveLocalMessage(chat.id, botMsg);
+          if (currentChatId === chat.id) {
+            renderChatMessages(chat);
+            renderChatList(document.getElementById('chatSearchInput')?.value || '');
+          }
+        }, 500);
+      }
+      
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Отправить';
+      }
+      
+      if (msgInput) msgInput.focus();
+    }
+
+    if (sendBtn) sendBtn.addEventListener('click', handleSend);
+    if (msgInput) {
+      msgInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+      setTimeout(function() { msgInput.focus(); }, 100);
+    }
+  }
+
+  function renderChatMessages(chat) {
+    var msgContainer = document.getElementById('chatMessages');
+    if (!msgContainer) return;
+    
+    if (!chat.messages || chat.messages.length === 0) {
+      msgContainer.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">Нет сообщений. Напишите первое!</div>';
+      return;
+    }
+    
+    msgContainer.innerHTML = chat.messages.map(function(m) {
+      var isOwn = (m.fromBin === currentUser.binId);
+      var senderName = isOwn ? 'Вы' : (m.username || 'Собеседник');
+      var msgText = m.message || m.text || '';
+      var timeStr = '';
+      try {
+        var d = new Date(m.date || m.createdAt);
+        if (!isNaN(d.getTime())) timeStr = d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+      } catch(e) {}
+      
+      return `
+        <div class="message-bubble ${isOwn ? 'own' : ''}">
+          <div class="message-sender">${escapeHtml(senderName)}${m._local ? ' (локально)' : ''}</div>
+          <div>${escapeHtml(msgText)}</div>
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+    }).join('');
+    
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+
+  // ============== НАВИГАЦИЯ ==============
+
+  document.querySelectorAll('.header-nav span').forEach(function(el) {
+    el.addEventListener('click', function() {
+      navigateTo(this.getAttribute('data-page'));
+    });
+  });
+
+  document.querySelectorAll('.left-menu-item[data-page]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      navigateTo(this.getAttribute('data-page'));
+    });
+  });
+
+  document.getElementById('logoBtn').addEventListener('click', function() {
+    navigateTo('profile');
+  });
+
+  document.getElementById('settingsMenuBtn').addEventListener('click', function() {
+    var newName = prompt('Новое имя:', currentUser.name);
+    if (newName && newName.trim()) {
+      currentUser.name = newName.trim();
+      localStorage.setItem('mismos_username', currentUser.name);
+      navigateTo('profile');
+      showToast('Имя изменено');
+    }
+  });
+
+  function navigateTo(page) {
+    currentPage = page;
+    currentChatId = null;
+    
+    if (messageRefreshTimer && page !== 'messages') {
+      clearInterval(messageRefreshTimer);
+      messageRefreshTimer = null;
+    }
+    
+    document.querySelectorAll('.header-nav span').forEach(function(s) { s.classList.remove('active'); });
+    var hi = document.querySelector('.header-nav span[data-page="' + page + '"]');
+    if (hi) hi.classList.add('active');
+    
+    document.querySelectorAll('.left-menu-item[data-page]').forEach(function(i) { i.classList.remove('active'); });
+    var li = document.querySelector('.left-menu-item[data-page="' + page + '"]');
+    if (li) li.classList.add('active');
+    
+    renderPage(page);
+  }
+
+  // ============== РЕГИСТРАЦИЯ ==============
+
+  var registerNameInput = document.getElementById('registerNameInput');
+  var registerBtn = document.getElementById('registerBtn');
+  
+  if (registerNameInput) {
+    registerNameInput.addEventListener('input', function(e) {
+      registerBtn.disabled = e.target.value.trim().length === 0;
+    });
+    registerNameInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && this.value.trim().length > 0) {
+        registerBtn.click();
+      }
+    });
+  }
+
+  if (registerBtn) {
+    registerBtn.addEventListener('click', function() {
+      var name = registerNameInput.value.trim();
+      if (!name) return;
+      currentUser.name = name;
+      localStorage.setItem('mismos_username', name);
+      localStorage.setItem('mismos_registered', 'true');
+      isRegistered = true;
+      document.getElementById('registerScreen').classList.add('hidden');
+      document.getElementById('licenseScreen').classList.remove('hidden');
+    });
+  }
+
+  document.getElementById('licenseAcceptBtn').addEventListener('click', async function() {
+    localStorage.setItem('mismos_license', 'true');
+    licenseAccepted = true;
+    document.getElementById('licenseScreen').classList.add('hidden');
+    document.getElementById('mainInterface').classList.remove('hidden');
+    await initApp();
+  });
+
+  document.getElementById('licenseRejectBtn').addEventListener('click', function() {
+    document.getElementById('licenseScreen').classList.add('hidden');
+    document.getElementById('rejectScreen').classList.remove('hidden');
+  });
+
+  document.getElementById('rejectBackBtn').addEventListener('click', function() {
+    localStorage.removeItem('mismos_registered');
+    localStorage.removeItem('mismos_license');
+    localStorage.removeItem('mismos_username');
+    currentUser.name = '';
+    isRegistered = false;
+    licenseAccepted = false;
+    document.getElementById('rejectScreen').classList.add('hidden');
+    document.getElementById('registerScreen').classList.remove('hidden');
+    registerNameInput.value = '';
+    registerBtn.disabled = true;
+  });
+
+  // ============== ИНИЦИАЛИЗАЦИЯ ==============
+
+  async function initApp() {
+    await getOrCreateBinId();
+    
+    // Тестируем API
+    var apiOk = await testAPI();
+    if (!apiOk) {
+      showToast('API недоступен. Сообщения будут сохраняться локально и не дойдут до получателя.', true);
+      console.warn('API недоступен. Работаем в локальном режиме.');
+    }
+    
+    await buildChatsFromAPI();
+    renderPage('profile');
+    showToast('Добро пожаловать, ' + currentUser.name + '! BIN ID: ' + currentUser.binId);
+  }
+
+  function checkAuth() {
+    var rs = document.getElementById('registerScreen');
+    var ls = document.getElementById('licenseScreen');
+    var rjs = document.getElementById('rejectScreen');
+    var mi = document.getElementById('mainInterface');
+    
+    if (isRegistered && currentUser.name && licenseAccepted) {
+      rs.classList.add('hidden');
+      ls.classList.add('hidden');
+      rjs.classList.add('hidden');
+      mi.classList.remove('hidden');
+      initApp();
+      return true;
+    }
+    if (!isRegistered || !currentUser.name) {
+      rs.classList.remove('hidden');
+      ls.classList.add('hidden');
+      rjs.classList.add('hidden');
+      mi.classList.add('hidden');
+      registerBtn.disabled = true;
+      registerNameInput.value = '';
+    } else if (isRegistered && currentUser.name && !licenseAccepted) {
+      rs.classList.add('hidden');
+      ls.classList.remove('hidden');
+      rjs.classList.add('hidden');
+      mi.classList.add('hidden');
+    }
+    return false;
+  }
+
+  checkAuth();
+})();
+</script>
+</body>
+  </html>
